@@ -6,9 +6,9 @@
  * 注意，如果你不使用它请不要删除该文件。
  */
 
-import { axios } from "@/utils";
-import type { Dispatch } from "redux";
-import createReducer from "@/redux/createReducer";
+import { request } from '@/utils';
+import type { Dispatch } from 'redux';
+import createReducer from '@/redux/createReducer';
 
 export const effects = {};
 

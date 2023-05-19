@@ -8,12 +8,12 @@
  * 最后需要导出一个 reducer 函数，在 '@/components/LazyLoader' 组件中定义了如何使用。
  */
 
-import { axios } from "@/utils";
-import type { Dispatch } from "redux";
-import createReducer from "@/redux/createReducer";
+import { request } from '@/utils';
+import type { Dispatch } from 'redux';
+import createReducer from '@/redux/createReducer';
 
 export const effects = {
-  getMenuSource: (query: any) => axios.post("/v1.0/menuSource", query),
+  getMenuSource: (query: any) => request.post('/v1.0/menuSource', query),
 };
 
 export const actions = {
@@ -22,7 +22,7 @@ export const actions = {
       const response: any = await effects.getMenuSource(query);
       const { code, data } = response;
       if (code === 0) {
-        dispatch({ type: "getMenuSource", payload: { menuSource: data } });
+        dispatch({ type: 'getMenuSource', payload: { menuSource: data } });
       }
       // 这里返回 response。这样你也可以在 .then() 中拿到结果。
       return response;

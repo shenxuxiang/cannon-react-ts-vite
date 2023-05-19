@@ -1,32 +1,34 @@
-import tween, { TweenAttrNames } from "./tween";
-export { default as axios } from "./axios";
-export { default as events } from "./events";
-export { default as PrintPDF } from "./printPDF";
-export { default as useReducer } from "./useReducer";
-export { default as downLoadFile } from "./download";
+import tween, { TweenAttrNames } from './tween';
+
+export { default as useReducer } from './useReducer';
+export { default as downLoadFile } from './download';
+export { default as PrintPDF } from './printPDF';
+export { default as history } from './history';
+export { default as request } from './axios';
+export { default as events } from './events';
 
 export function getType(data: any) {
   return Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
 }
 
 export function isArray<T>(data: any): data is T[] {
-  return getType(data) === "array";
+  return getType(data) === 'array';
 }
 
 export function isObject(data: any): data is object {
-  return getType(data) === "object";
+  return getType(data) === 'object';
 }
 
 export function isMap<K, V>(data: any): data is Map<K, V> {
-  return getType(data) === "map";
+  return getType(data) === 'map';
 }
 
 export function isSet<T>(data: any): data is Set<T> {
-  return getType(data) === "set";
+  return getType(data) === 'set';
 }
 
 export function isPlainObject(data: any) {
-  if (typeof data !== "object" || !data) return false;
+  if (typeof data !== 'object' || !data) return false;
 
   const proto = Object.getPrototypeOf(data);
   if (Object.getPrototypeOf(proto) === null) return true;
@@ -37,30 +39,25 @@ export function isPlainObject(data: any) {
   return _proto === proto;
 }
 
-export function isEmpty(
-  data: null | undefined | object | Array<any> | Map<any, any> | Set<any>
-) {
+export function isEmpty(data: null | undefined | object | Array<any> | Map<any, any> | Set<any>) {
   if (!data) return true;
   if (isArray(data)) {
     return data.length <= 0;
   } else if (isMap(data) || isSet(data)) {
     return data.size <= 0;
   } else {
-    const keys = [
-      ...Object.getOwnPropertyNames(data),
-      ...Object.getOwnPropertySymbols(data),
-    ];
+    const keys = [...Object.getOwnPropertyNames(data), ...Object.getOwnPropertySymbols(data)];
     return keys.length <= 0;
   }
 }
 
 // 获取文件后缀
 export function extName(filename: string) {
-  if (!filename) return "";
+  if (!filename) return '';
 
-  const idx = filename.lastIndexOf(".");
+  const idx = filename.lastIndexOf('.');
   if (~idx) return filename.slice(idx + 1);
-  return "";
+  return '';
 }
 
 /**
@@ -130,24 +127,18 @@ export const throttle = <T extends object>(func: Function, delay: number) => {
  */
 export const scrollToTargetPosition = (
   endPosition: number,
-  timingFunction: TweenAttrNames = "linear",
+  timingFunction: TweenAttrNames = 'linear',
   timer = 50,
-  element: HTMLElement = document.documentElement
+  element: HTMLElement = document.documentElement,
 ) => {
   execAnimation(0);
 
   function execAnimation(count: number) {
     const scrollTop = element.scrollTop;
-    let pos = tween[timingFunction](
-      count,
-      scrollTop,
-      endPosition - scrollTop,
-      timer
-    );
+    let pos = tween[timingFunction](count, scrollTop, endPosition - scrollTop, timer);
     element.scrollTop = pos;
 
-    if (count + 1 < timer)
-      requestAnimationFrame(() => execAnimation(count + 1));
+    if (count + 1 < timer) requestAnimationFrame(() => execAnimation(count + 1));
   }
 };
 // 延迟
@@ -173,7 +164,7 @@ export function getLocalStorage(key: string) {
 
 export function toFixed(value: string | number, divisor = 10000, float = 2) {
   if (!value) return 0;
-  if (typeof value === "string") value = Number(value);
+  if (typeof value === 'string') value = Number(value);
   const sum = (value / divisor).toFixed(float);
   return Number(sum);
 }

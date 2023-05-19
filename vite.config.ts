@@ -65,11 +65,11 @@ export default defineConfig(({ mode }) => {
       postcss: {
         plugins: [ postcssPresetEnv ]
       },
-      modules: {
-        scopeBehaviour: 'local',
-        // localsConvention: 'camelCaseOnly',
-        globalModulePaths: [ /(?<!\.module)\.css/, /(?<!\.module)\.less/ ],
-      },
+      // modules: {
+      //   scopeBehaviour: 'local',
+      //   localsConvention: 'camelCaseOnly',
+      //   globalModulePaths: [ /(?<!\.module)\.css/, /(?<!\.module)\.less/ ],
+      // },
       preprocessorOptions: {
         less: {
           modifyVars: {},

@@ -1,9 +1,9 @@
-import React, { memo, useEffect } from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import type { Dispatch } from "redux";
-import { actions } from "@/models/home";
-import classes from "./index.module.less";
+import React, { memo, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import type { Dispatch } from 'redux';
+import { actions } from '@/models/home';
+import classes from './index.module.less';
 
 const mapStateFromProps = (state: any) => {
   return state.home;
@@ -18,7 +18,7 @@ function Page(props: any) {
   useEffect(() => {
     props.getMenuSource({}).then((data: any) => {
       // 你可以在这里获取数据，可以直接通过 props.menuSource.
-      console.log(data, "menuSource");
+      console.log(data, 'menuSource');
     });
   }, []);
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 type InitialStateType<S> = () => S | S;
 
@@ -14,7 +14,7 @@ function useReducer<S>(initialState: InitialStateType<S>): [S, SetState<S>] {
   const [state, dispatchSetState] = useState<S>(initialState);
 
   function setState(action: Action<S>) {
-    if (typeof action === "function") {
+    if (typeof action === 'function') {
       dispatchSetState((prevState) => reduce(prevState, action(prevState)));
     } else {
       dispatchSetState((prevState) => reduce(prevState, action));

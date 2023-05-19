@@ -1,4 +1,4 @@
-import type { AnyAction } from "redux";
+import type { AnyAction } from 'redux';
 
 export default function createReducer(actions: object) {
   const types = new Set(Object.keys(actions));

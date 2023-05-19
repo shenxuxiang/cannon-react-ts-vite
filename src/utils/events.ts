@@ -25,7 +25,7 @@ export class EventEmitter {
   remove(type: string, fn?: Function) {
     const fns = this.listeners[type];
     if (!fns || fns.length <= 0) return;
-    if (typeof fn === "undefined") {
+    if (typeof fn === 'undefined') {
       fns.length = 0;
       return;
     } else {

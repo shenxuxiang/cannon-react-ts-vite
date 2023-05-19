@@ -1,56 +1,52 @@
-import React from "react";
-import LazyLoader from "@/components/LazyLoader";
-import {
-  HomeOutlined,
-  SolutionOutlined,
-  TeamOutlined,
-  UserSwitchOutlined,
-} from "@ant-design/icons";
-import { reducer as homeReducer } from "@/models/home";
+import React from 'react';
+import LazyLoader from '@/components/LazyLoader';
+import { UserSwitchOutlined, SolutionOutlined, HomeOutlined, TeamOutlined } from '@ant-design/icons';
+import { reducer as homeReducer } from '@/models/home';
 
-type RouteItem = {
-  // label 字段用在菜单中展示 router 的名称
-  label?: string;
-  // label 字段用在菜单中展示 router 的图标
-  icon?: React.ReactElement;
-  path: string;
+export type RouteItem = {
+  // 组件
   element?: React.ReactElement;
+  // 菜单图标
+  icon?: React.ReactElement;
+  // 子路由
   children?: RouteItem[];
+  // 菜单名称
+  label?: string;
+  // 路由路径
+  path: string;
 };
 
-const iconStyle = { fontSize: 18, marginRight: 10, color: "#fff" };
+const iconStyle = { fontSize: 18, marginRight: 10, color: '#fff' };
 
 const routesMap: RouteItem[] = [
   {
-    path: "/home",
-    label: "首页",
+    path: '/home',
+    label: '首页',
     icon: <HomeOutlined style={iconStyle} />,
-    element: React.createElement(
-      LazyLoader(() => import("../pages/home"), { home: homeReducer })
-    ),
+    element: React.createElement(LazyLoader(() => import('../pages/home'), { home: homeReducer })),
   },
   {
-    path: "/user",
-    label: "用户管理",
+    path: '/user',
+    label: '用户管理',
     icon: <SolutionOutlined style={iconStyle} />,
     children: [
       {
-        path: "/user/user-list",
-        element: React.createElement(
-          LazyLoader(() => import("../pages/user/userList"))
-        ),
-        label: "用户列表",
+        label: '用户列表',
+        path: '/user/user-list',
         icon: <TeamOutlined style={iconStyle} />,
+        element: React.createElement(LazyLoader(() => import('../pages/user/userList'))),
       },
       {
-        path: "/user/role-list",
-        element: React.createElement(
-          LazyLoader(() => import("../pages/user/roleList"))
-        ),
-        label: "角色列表",
+        path: '/user/role-list',
+        label: '角色列表',
         icon: <UserSwitchOutlined style={iconStyle} />,
+        element: React.createElement(LazyLoader(() => import('../pages/user/roleList'))),
       },
     ],
+  },
+  {
+    path: '/404',
+    element: React.createElement(LazyLoader(() => import('../pages/404'))),
   },
 ];
 

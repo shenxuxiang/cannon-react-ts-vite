@@ -8,11 +8,9 @@
  * @author shenxuxiang
  */
 /* eslint-disable */
-export const linear = (t: number, b: number, c: number, d: number) =>
-  (c * t) / d + b;
+export const linear = (t: number, b: number, c: number, d: number) => (c * t) / d + b;
 
-export const easeIn = (t: number, b: number, c: number, d: number) =>
-  t === 0 ? b : c * 2 ** (10 * (t / d - 1)) + b;
+export const easeIn = (t: number, b: number, c: number, d: number) => (t === 0 ? b : c * 2 ** (10 * (t / d - 1)) + b);
 
 export const easeOut = (t: number, b: number, c: number, d: number) =>
   t === d ? b + c : c * (-(2 ** ((-10 * t) / d)) + 1) + b;
@@ -37,13 +35,13 @@ export function QuadEaseInOut(t: number, b: number, c: number, d: number) {
 }
 
 export type TweenAttrNames =
-  | "linear"
-  | "easeIn"
-  | "easeOut"
-  | "easeInOut"
-  | "QuadEaseIn"
-  | "QuadEaseOut"
-  | "QuadEaseInOut";
+  | 'linear'
+  | 'easeIn'
+  | 'easeOut'
+  | 'easeInOut'
+  | 'QuadEaseIn'
+  | 'QuadEaseOut'
+  | 'QuadEaseInOut';
 
 export default {
   linear,

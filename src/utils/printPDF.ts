@@ -1,5 +1,5 @@
-import html2canvas from "html2canvas";
-import JSPDF from "jspdf";
+import html2canvas from 'html2canvas';
+import JSPDF from 'jspdf';
 
 type Html2CanvasOptions = {
   scale: number;
@@ -12,8 +12,8 @@ type Html2CanvasOptions = {
 };
 
 type PdfOptions = {
-  orientation: "p" | "l";
-  format: "a4";
+  orientation: 'p' | 'l';
+  format: 'a4';
   safeAreaOffset: [number, number];
   showPageNumber: boolean;
 };
@@ -29,8 +29,8 @@ const defaultHtml2CanvasOptions = {
 };
 
 const defaultPdfOptions: Required<PdfOptions> = {
-  orientation: "p",
-  format: "a4",
+  orientation: 'p',
+  format: 'a4',
   safeAreaOffset: [50, 20],
   showPageNumber: true,
 };
@@ -58,26 +58,15 @@ class PrintPDF {
   public pdf$height: number;
   public pdf: any;
   public fileName: string;
-  public ignoreTagNames = new Set<String>([
-    "colgroup",
-    "td",
-    "link",
-    "script",
-    "svg",
-  ]);
+  public ignoreTagNames = new Set<String>(['colgroup', 'td', 'link', 'script', 'svg']);
   public ignoreNodes = new WeakSet<HTMLElement>();
 
   constructor(props: PrintClassProps) {
-    const {
-      element,
-      html2CanvasOptions,
-      pdfOptions,
-      fileName = "default",
-    } = props;
+    const { element, html2CanvasOptions, pdfOptions, fileName = 'default' } = props;
     this.element = element;
     this.h2cOpts = { ...defaultHtml2CanvasOptions, ...html2CanvasOptions };
     this.pdfOpts = { ...defaultPdfOptions, ...pdfOptions };
-    this.fileName = fileName.endsWith(".pfd") ? fileName : fileName + ".pdf";
+    this.fileName = fileName.endsWith('.pfd') ? fileName : fileName + '.pdf';
     // safeAreaOffset 表示 xy 方向的距离安全区域的便宜量。
     const { orientation, format, safeAreaOffset } = this.pdfOpts;
     const [pdf$width, pdf$height] = width$height[format];
@@ -87,9 +76,9 @@ class PrintPDF {
      * @params { formate }     PDF 的格式（尺寸），默认 "a4"。你也可以通过定义尺寸，例如 [ 595.28, 841.89 ]。
      * @params { unit }        单位。用于打印时统一使用 "pt" 作为单位。
      */
-    this.pdf = new JSPDF({ orientation, format, unit: "pt" });
+    this.pdf = new JSPDF({ orientation, format, unit: 'pt' });
 
-    if (orientation === "p") {
+    if (orientation === 'p') {
       this.pdf$width = pdf$width;
       this.pdf$height = pdf$height;
     } else {
@@ -119,24 +108,19 @@ class PrintPDF {
     document.body.appendChild(canvas);
 
     const { scale } = this.h2cOpts;
-    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
     const { width: canvas$width, height: canvas$height } = canvas;
     // 一页 PDF 的高度转换成 HTML 的高度。
-    const pdfHeight2htmlHeight =
-      ((canvas$width / this.pdf$safeAreaWidth) * this.pdf$safeAreaHeight) /
-      scale;
+    const pdfHeight2htmlHeight = ((canvas$width / this.pdf$safeAreaWidth) * this.pdf$safeAreaHeight) / scale;
     // html 转换成 pdf 的宽度
     const pdfContentWidth = this.pdf$safeAreaWidth;
     // html 转成成 pdf 的高度（这里是所有要打印内容的高度）
-    const pdfContentHeight =
-      (canvas$height * this.pdf$safeAreaWidth) / canvas$width;
+    const pdfContentHeight = (canvas$height * this.pdf$safeAreaWidth) / canvas$width;
 
     // 遍历要打印的 HTML 内容的根节点，计算出每个 PDF 页面内容底部的偏移量（相对 this.element.offsetTop）
     const pos = this.traversNode(this.element, pdfHeight2htmlHeight);
     // 将计算出的 pos 转换成 pdf 中的位置。
-    const positions = pos.map(
-      (item) => (-item * scale * pdfContentHeight) / canvas$height
-    );
+    const positions = pos.map((item) => (-item * scale * pdfContentHeight) / canvas$height);
     const safeAreaOffsetLeft = this.pdfOpts.safeAreaOffset[1];
     const safeAreaOffsetTop = this.pdfOpts.safeAreaOffset[0];
     let count = 0;
@@ -149,16 +133,16 @@ class PrintPDF {
        */
       this.pdf.addImage(
         imgData,
-        "JPEG",
+        'JPEG',
         safeAreaOffsetLeft,
         safeAreaOffsetTop + positions[count++],
         pdfContentWidth,
-        pdfContentHeight
+        pdfContentHeight,
       );
       // 设置填充的颜色
-      this.pdf.setFillColor("#ffffff");
+      this.pdf.setFillColor('#ffffff');
       // 在每个 PDF 页面的页头绘制并填充一个矩形
-      this.pdf.rect(0, 0, this.pdf$width, safeAreaOffsetTop, "F");
+      this.pdf.rect(0, 0, this.pdf$width, safeAreaOffsetTop, 'F');
 
       /**
        * 打个比方：PDF 的高度是 1000，安全区域的高度是 800（四周要预留空白）。
@@ -175,14 +159,14 @@ class PrintPDF {
           // 页面底部的这个遮罩，从绘制的开始位置开始一直到页面最底部，
           // 只需要保证这个高度足够大就行，不需要精确到某个数值（你也可以填99999）。它不会绘制到下一页。
           this.pdf$height - contentHeight,
-          "F"
+          'F',
         );
       }
 
       // 是否显示页数
       if (this.pdfOpts.showPageNumber) {
         // 设置字体颜色
-        this.pdf.setTextColor("#b3b3b3");
+        this.pdf.setTextColor('#b3b3b3');
         // 设置字体大小
         this.pdf.setFontSize(12);
         // 要打印的内容（不要使用中文，中文会乱码）
@@ -190,7 +174,10 @@ class PrintPDF {
           `———————— ${count}/${positions.length} ————————`,
           this.pdf$width / 2,
           this.pdf$safeAreaHeight + safeAreaOffsetTop * 1.5,
-          { align: "center", baseline: "middle" }
+          {
+            align: 'center',
+            baseline: 'middle',
+          },
         );
       }
 
@@ -207,9 +194,9 @@ class PrintPDF {
     if (this.ignoreTagNames.has(node.nodeName.toLowerCase())) return false;
     if (this.ignoreNodes.has(node)) return false;
     const style = window.getComputedStyle(node);
-    const display = style.getPropertyValue("display");
-    const opacity = style.getPropertyValue("opacity");
-    if (display === "none" || opacity === "0") return false;
+    const display = style.getPropertyValue('display');
+    const opacity = style.getPropertyValue('opacity');
+    if (display === 'none' || opacity === '0') return false;
     return true;
   }
 
@@ -219,9 +206,9 @@ class PrintPDF {
     return (
       nodeType === 3 ||
       childElementCount <= 0 ||
-      nodeName.toLowerCase() === "tr" ||
-      nodeName.toLowerCase() === "th" ||
-      node.getAttribute("data-minimum-unit-pdf")
+      nodeName.toLowerCase() === 'tr' ||
+      nodeName.toLowerCase() === 'th' ||
+      node.getAttribute('data-minimum-unit-pdf')
     );
   }
 
@@ -334,9 +321,7 @@ function getElementOffsetTop(element: HTMLElement) {
   let parent: any = element.offsetParent;
   while (parent) {
     offsetTop += parent.offsetTop;
-    offsetTop +=
-      parseInt(getComputedStyle(parent).getPropertyValue("border-top-width")) |
-      0;
+    offsetTop += parseInt(getComputedStyle(parent).getPropertyValue('border-top-width')) | 0;
     parent = parent.offsetParent;
   }
   return offsetTop;
