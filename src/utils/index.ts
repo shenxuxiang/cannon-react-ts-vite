@@ -1,12 +1,5 @@
 import tween, { TweenAttrNames } from './tween';
 
-export { default as useReducer } from './useReducer';
-export { default as downLoadFile } from './download';
-export { default as PrintPDF } from './printPDF';
-export { default as history } from './history';
-export { default as request } from './axios';
-export { default as events } from './events';
-
 export function getType(data: any) {
   return Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
 }
@@ -27,18 +20,6 @@ export function isSet<T>(data: any): data is Set<T> {
   return getType(data) === 'set';
 }
 
-export function isPlainObject(data: any) {
-  if (typeof data !== 'object' || !data) return false;
-
-  const proto = Object.getPrototypeOf(data);
-  if (Object.getPrototypeOf(proto) === null) return true;
-  let _proto = proto;
-  while (Object.getPrototypeOf(_proto)) {
-    _proto = Object.getPrototypeOf(_proto);
-  }
-  return _proto === proto;
-}
-
 export function isEmpty(data: null | undefined | object | Array<any> | Map<any, any> | Set<any>) {
   if (!data) return true;
   if (isArray(data)) {
@@ -51,7 +32,11 @@ export function isEmpty(data: null | undefined | object | Array<any> | Map<any, 
   }
 }
 
-// 获取文件后缀
+/**
+ * 获取文件后缀名
+ * @param filename 完整的文件名
+ * @returns
+ */
 export function extName(filename: string) {
   if (!filename) return '';
 
@@ -61,110 +46,165 @@ export function extName(filename: string) {
 }
 
 /**
- * 浅比较
- * @param obj1
- * @param obj2
- * @returns ture or false
+ * 下载文件
+ * @param fileName 指定文件下载后的文件名
+ * @param data     文件资源（blob）
+ * @param extName  文件后缀
  */
-export const shollawEqual = (obj1: any, obj2: any): boolean => {
-  if (obj1 === obj2) {
-    return true;
-  }
+export function downloadFile(fileName: string, data: any, extName = '.xlsx') {
+  const blob = new Blob([data]);
+  const eLink = document.createElement('a');
+  // <a/> 上的 download 属性用于重命名一个需要下载的文件
+  eLink.download = /\.([a-zA-Z]+)$/i.test(fileName) ? fileName : fileName + extName;
+  eLink.style.display = 'none';
+  eLink.href = URL.createObjectURL(blob);
+  document.body.appendChild(eLink);
+  eLink.click();
+  // 释放 URL 对象
+  URL.revokeObjectURL(eLink.href);
+  document.body.removeChild(eLink);
+}
 
-  let keys1 = Object.keys(obj1);
-  let keys2 = Object.keys(obj2);
-  if (keys1.length !== keys2.length) {
-    return false;
+// 判断两个值是否完全相等，可以比较 +0 !== -0，NaN === NaN
+export function objectIs(v1: any, v2: any): boolean {
+  if (v1 === 0 && v2 === 0) {
+    return 1 / v1 === 1 / v2;
+  } else if (v1 !== v1) {
+    return v2 !== v2;
+  } else {
+    return v1 === v2;
   }
+}
 
-  for (let key of keys1) {
-    if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
-      return false;
-    }
+export function shallowEqual(obj1: any, obj2: any): boolean {
+  if (objectIs(obj1, obj2)) return true;
+
+  // 如果 obj1、obj2 有一个不是 object 类型，则返回 false
+  // 注意：typeof null === 'object'
+  if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) return false;
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  for (let i = 0; i < keys1.length; i++) {
+    const key = keys1[i];
+    if (!Object.hasOwn(obj2, key) || !objectIs(obj1[key], obj2[key])) return false;
   }
 
   return true;
-};
+}
 
 /**
  * 防抖
- * @param func
- * @param delay
+ * @param func        防抖的方法
+ * @param delay       防抖的时间间隔
+ * @param immediately 是否立即执行 func
+ * @returns
  */
-export const debounce = <T extends object>(func: Function, delay: number) => {
-  let task: any = null;
-  return (args: T) => {
-    if (task) {
-      clearTimeout(task);
+export function debounce(func: Function, delay: number, immediately = false) {
+  let interval: any = null;
+  return function (...args: any[]) {
+    if (immediately) {
+      if (!interval) func(...args);
+
+      interval && clearTimeout(interval);
+      interval = setTimeout(() => (interval = null), delay);
+    } else {
+      clearTimeout(interval);
+      interval = setTimeout(() => func(...args), delay);
     }
-    task = setTimeout(() => {
-      func(args);
-    }, delay);
   };
-};
+}
+
 /**
  * 节流
- * @param func
- * @param delay
+ * @param func        节流的方法
+ * @param delay       节流的时间间隔
+ * @param immediately 是否立即执行 func
+ * @returns
  */
-export const throttle = <T extends object>(func: Function, delay: number) => {
-  let task: any = null;
-  return (args: T) => {
-    if (!task) {
-      task = setTimeout(() => {
-        task = null;
-        func(args);
+export function throttle(func: Function, delay: number, immediately = false) {
+  let interval: any = null;
+  return function (...args: any[]) {
+    if (immediately) {
+      if (interval) return;
+      func(...args);
+      interval = setTimeout(() => (interval = null), delay);
+    } else {
+      if (interval) return;
+      interval = setTimeout(() => {
+        func(...args);
+        interval = null;
       }, delay);
     }
   };
-};
+}
 
 /**
- * @params { endPosition }    终点位置
- * @params { timingFunction } 动画曲线
- * @params { timer }          动画执行的次数
- * @params { element }        目标元素
+ * 页面，元素容器（voerflow 不是 visible）的滚动（动画）
+ * @param position       终点位置
+ * @param timingFunction 动画曲线
+ * @param times          动画执行的次数
+ * @param container      目标元素
  */
-export const scrollToTargetPosition = (
-  endPosition: number,
+export function scrollToPosition(
+  position: number,
   timingFunction: TweenAttrNames = 'linear',
-  timer = 50,
-  element: HTMLElement = document.documentElement,
-) => {
+  times = 50,
+  container: HTMLElement = document.documentElement,
+) {
   execAnimation(0);
 
   function execAnimation(count: number) {
-    const scrollTop = element.scrollTop;
-    let pos = tween[timingFunction](count, scrollTop, endPosition - scrollTop, timer);
-    element.scrollTop = pos;
-
-    if (count + 1 < timer) requestAnimationFrame(() => execAnimation(count + 1));
+    const scrollTop = container.scrollTop;
+    let pos = tween[timingFunction](count, scrollTop, position - scrollTop, times);
+    container.scrollTop = pos;
+    if (pos === position || count >= times) return;
+    requestAnimationFrame(() => execAnimation(count + 1));
   }
-};
-// 延迟
-export function delay(time: number) {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(null), time);
+}
+
+/**
+ * 延迟执行函数
+ * @param time  延迟执行的的时间
+ * @param value 期望得到的值。如果 value 是一个 Error 实例则返回 rejected promise，否则返回 fulfuilled promise
+ * @returns
+ */
+export function delay<T>(time: number, value: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (value instanceof Error) {
+        reject(value);
+      } else {
+        resolve(value);
+      }
+    }, time);
   });
 }
 
 export function setLocalStorage(key: string, value: any) {
-  if (!value) {
+  if (value === null) {
     window.localStorage.clearItem(key);
-    return;
+  } else {
+    window.localStorage.setItem(key, JSON.stringify(value));
   }
-
-  window.localStorage.setItem(key, JSON.stringify(value));
 }
 
 export function getLocalStorage(key: string) {
   let value = window.localStorage.getItem(key);
-  return value ? JSON.parse(value) : value;
+  return value ? JSON.parse(value) : null;
 }
 
+/**
+ * 数字格式化，toFixed(990000000, 10000, 2) => 99000.00(单位：万)
+ * @param value   需要计算的数值
+ * @param divisor 格式化的单位（万：10000，百万：1000000）
+ * @param float   保留的小数
+ * @returns
+ */
 export function toFixed(value: string | number, divisor = 10000, float = 2) {
-  if (!value) return 0;
-  if (typeof value === 'string') value = Number(value);
-  const sum = (value / divisor).toFixed(float);
-  return Number(sum);
+  if (!value) return '';
+  return ((value as number) / divisor).toFixed(float);
 }

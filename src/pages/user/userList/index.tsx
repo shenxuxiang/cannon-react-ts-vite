@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import classes from './index.module.less';
-import { useReducer } from '@/utils';
+import useReducer from '@/utils/useReducer';
 import { Input, Button, Space, Alert } from 'antd';
 
 function initialState() {

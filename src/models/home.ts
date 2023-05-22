@@ -8,7 +8,7 @@
  * 最后需要导出一个 reducer 函数，在 '@/components/LazyLoader' 组件中定义了如何使用。
  */
 
-import { request } from '@/utils';
+import request from '@/utils/axios';
 import type { Dispatch } from 'redux';
 import createReducer from '@/redux/createReducer';
 

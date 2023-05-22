@@ -6,7 +6,7 @@
  * 注意，如果你不使用它请不要删除该文件。
  */
 
-import { request } from '@/utils';
+import request from '@/utils/axios';
 import type { Dispatch } from 'redux';
 import createReducer from '@/redux/createReducer';
 
