@@ -51,12 +51,6 @@
 >想了解更多关于 env 的内容可以访问 https://cn.vitejs.dev/guide/env-and-mode.html
 
 
-## 关于 SVG
-> 项目中凡是使用 ".svg?react" 形式引入的都将通过 vite-plugin-svgr 插件统一转成 React 组件的形式。
->
-> 如果引入时没有添加 "?react" 则还是会转换成 url 或 base64 的格式。
-
-
 ## 属性含义介绍
 
 > VITE_BASE_URL - 开发和生产环境服务的公共基础路径。如果开发和生产环境的公共路径不一样时可以分别在 .env.development、.env.production 文件中配置 VITE_BASE_URL。项目中使用 `import.meta.env.BASE_URL` 访问公共路径。
@@ -166,7 +160,6 @@
 标题、描述、关键字这些内容同样在 .env 文件中进行设置。
 
 
-
 ## Git 规范
 ### 分支规范
 #### 主干分支 master
@@ -211,9 +204,7 @@
 >
 > [name] 表示开发的功能名称；
 >
-> [developer] 表示该功能的开发人员姓名（拼音）。
 >
-**注意，功能分支不可直接合并至 master**
 
 
 #### 热修复分支`hotfix/[name]`

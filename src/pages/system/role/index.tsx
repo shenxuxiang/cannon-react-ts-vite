@@ -1,10 +1,16 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { Button, Popconfirm, Space, message } from 'antd';
-import { queryTableList } from '@/api/workInfo';
+import { useActions, useModel } from '@/redux';
+import { systemRoleActions } from '@/models';
 import { ContentFormTable } from 'qm-vnit';
 import type { Dayjs } from 'dayjs';
 
 function Page() {
+  const { queryRoleList } = useActions(systemRoleActions);
+  const systemRoleModel = useModel('systemRole');
+
+  console.log(systemRoleModel);
+
   const columns = useMemo(() => {
     return [
       {
@@ -77,7 +83,7 @@ function Page() {
       bordered
       rowKey="id"
       columns={columns}
-      requestDataSource={queryTableList}
+      requestDataSource={queryRoleList}
       beforeQueryAction={handleValidateFormModels}
     />
   );

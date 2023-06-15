@@ -4,9 +4,8 @@ import { useBasicContext } from '@/common/BasicContext';
 import React, { useCallback, useEffect } from 'react';
 import { Popover, Layout, Avatar, Menu } from 'antd';
 import avatarURL from '@/assets/images/avatar.png';
-import useReducer from '@/utils/useReducer';
+import { splitPath, useReducer } from '@/utils';
 import { signOut } from '@/api/login';
-import { splitPath } from '@/utils';
 import './index.less';
 
 const { Content, Sider, Header, Footer } = Layout;

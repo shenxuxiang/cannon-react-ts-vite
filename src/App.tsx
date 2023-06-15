@@ -6,7 +6,9 @@ import React, { memo, useMemo, useRef } from 'react';
 import BasicContext from '@/common/BasicContext';
 import { pathToRegexp } from 'path-to-regexp';
 import zhCN from 'antd/es/locale/zh_CN';
+import { Provider } from 'react-redux';
 import { ConfigProvider } from 'antd';
+import { store } from '@/redux';
 import Routers from '@/routers';
 
 // 公共路径
@@ -27,6 +29,7 @@ function initialState() {
   let init!: BasicContextType['context'];
   const userInfo = getLocalStorage('USER_INFO');
   const params = userInfo ? { userInfo } : {};
+  // 通过调用函数完成 init 数据的初始化。
   generateUpdateBasicContext((data) => (init = data as BasicContextType['context']))(params);
   return init;
 }
@@ -61,11 +64,13 @@ export default memo(() => {
 
   return (
     <ConfigProvider locale={zhCN} theme={ANTD_THEME}>
-      <BasicContext.Provider value={context}>
-        <Router history={history as any} basename={BASE_URL}>
-          <Routers />
-        </Router>
-      </BasicContext.Provider>
+      <Provider store={store}>
+        <BasicContext.Provider value={context}>
+          <Router history={history as any} basename={BASE_URL}>
+            <Routers />
+          </Router>
+        </BasicContext.Provider>
+      </Provider>
     </ConfigProvider>
   );
 });

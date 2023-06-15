@@ -53,6 +53,55 @@ Mock.mock('/v1.0/sysUser/changePassword', 'post', {
   data: null,
 });
 
+Mock.mock('/v1.0/sysDict/type/list', 'post', {
+  code: 0,
+  message: '操作成功',
+  data: [
+    {
+      createTime: '2023-09-12T14:28:13.66577',
+      updateTime: '2023-09-15T16:43:39.72',
+      deleted: false,
+      dictId: '9',
+      dictTypeCode: 'WORK_SEASON',
+      dictName: '小麦',
+      valueType: 2,
+      value: '9',
+      description: '',
+      systemFlag: false,
+      sort: 1,
+      updator: '农业农村局',
+    },
+    {
+      createTime: '2023-09-12T14:28:13.663455',
+      updateTime: '2023-09-15T16:43:35.117',
+      deleted: false,
+      dictId: '8',
+      dictTypeCode: 'WORK_SEASON',
+      dictName: '玉米',
+      valueType: 2,
+      value: '8',
+      description: '',
+      systemFlag: false,
+      sort: 2,
+      updator: '农业农村局',
+    },
+    {
+      createTime: '2023-09-15T16:38:27.636737',
+      updateTime: '2023-09-15T16:43:28.009',
+      deleted: false,
+      dictId: '7933425235666149996',
+      dictTypeCode: 'WORK_SEASON',
+      dictName: '大豆',
+      valueType: 2,
+      value: '7933425235666149996',
+      description: '',
+      systemFlag: false,
+      sort: 3,
+      updator: '农业农村局',
+    },
+  ],
+});
+
 Mock.mock('/v1.0/sysUser/info', 'post', {
   code: 0,
   message: '操作成功',

@@ -260,7 +260,6 @@ function getPattern(name: string) {
 /**
  * 获取指定的 cookie
  * @param name cookie 的名称
- * @returns
  */
 export function getCookie(name: string) {
   const cookie = document.cookie;

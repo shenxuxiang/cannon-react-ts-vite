@@ -1,6 +1,7 @@
 import React from 'react';
 import LazyLoader from '@/components/LazyLoader';
-import { UserSwitchOutlined, SettingOutlined, HomeOutlined } from '@ant-design/icons';
+import { workInfoReducer, systemRoleReducer } from '@/models';
+import { UserSwitchOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
 
 export type RouteItem = {
   // 组件
@@ -22,7 +23,12 @@ const routesMap: RouteItem[] = [
     path: '/work-info',
     label: '作业信息',
     icon: <HomeOutlined style={iconStyle} />,
-    element: React.createElement(LazyLoader(() => import('../pages/workInfo'), { requiresAuth: true })),
+    element: React.createElement(
+      LazyLoader(
+        () => import('../pages/workInfo'),
+        { workInfo: workInfoReducer },
+      )
+    ),
   },
   {
     path: '/system',
@@ -33,13 +39,25 @@ const routesMap: RouteItem[] = [
         label: '角色列表',
         path: '/system/role',
         icon: <UserSwitchOutlined style={iconStyle} />,
-        element: React.createElement(LazyLoader(() => import('../pages/system/role'), { requiresAuth: true })),
+        element: React.createElement(
+            LazyLoader(
+              () => import('../pages/system/role'),
+              { systemRole: systemRoleReducer },
+              { requiresAuth: true }
+            )
+          ),
       },
     ],
   },
   {
     path: '/404',
-    element: React.createElement(LazyLoader(() => import('../pages/404'), { requiresAuth: false })),
+    element: React.createElement(
+      LazyLoader(
+        () => import('../pages/404'),
+        {},
+        { requiresAuth: false }
+      )
+    ),
   },
 ];
 

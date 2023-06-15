@@ -1,10 +1,15 @@
-import type { Dayjs } from 'dayjs';
-import { ContentFormTable } from 'qm-vnit';
-import { queryTableList } from '@/api/workInfo';
+import { actions as workInfoActions } from '@/models/workInfo';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Button, Popconfirm, Space, message } from 'antd';
+import { useModel, useActions } from '@/redux';
+import { ContentFormTable } from 'qm-vnit';
+import type { Dayjs } from 'dayjs';
 
 function Page() {
+  const { queryTableList } = useActions(workInfoActions);
+  const workInfoModel = useModel('workInfo');
+  console.log(workInfoModel);
+
   const columns = useMemo(() => {
     return [
       {

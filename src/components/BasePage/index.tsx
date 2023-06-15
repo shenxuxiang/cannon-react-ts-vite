@@ -1,11 +1,11 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBasicContext } from '@/common/BasicContext';
 import React, { memo, useEffect, useMemo } from 'react';
+import { getUserToken, isEmpty } from '@/utils';
+import { useModel, useActions } from '@/redux';
 import { createPath } from 'react-router-dom';
-import { queryUserInfo } from '@/api/main';
 import { routerGuard } from '@/routers';
-import { getUserToken } from '@/utils';
-import { isEmpty } from '@/utils';
+import { mainActions } from '@/models';
 import { message } from 'antd';
 
 export type Meta = {
@@ -23,9 +23,12 @@ export default memo((props: BasePageProps) => {
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const mainModel = useModel('main');
+  const actions = useActions(mainActions);
 
-  const { children, meta = {}, ...restProps } = props;
+  const { children, meta = {} } = props;
   const { requiresAuth = true } = meta;
+
   const {
     context: { userInfo, userPermissions },
     updateContext: updateBasicContext,
@@ -58,7 +61,7 @@ export default memo((props: BasePageProps) => {
     // 获取用户基本信息（需要登录）
     if (isEmpty(userInfo)) {
       // 获取用户信息
-      queryUserInfo().then((res) => updateBasicContext({ userInfo: res.data }));
+      actions.queryUserInfo().then((res: any) => updateBasicContext({ userInfo: res.data }));
     }
   }, [userInfo, requiresAuth, location, userPermissions]);
 
@@ -70,5 +73,14 @@ export default memo((props: BasePageProps) => {
     }
   }, [children]);
 
-  return child ? React.cloneElement(child, { params, location, navigate, queryUserInfo, meta, ...restProps }) : null;
+  return child
+    ? React.cloneElement(child, {
+        ...mainModel,
+        ...actions,
+        location,
+        navigate,
+        params,
+        meta,
+      })
+    : null;
 });
