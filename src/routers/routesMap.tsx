@@ -1,6 +1,7 @@
 import React from 'react';
 import LazyLoader from '@/components/LazyLoader';
 import { UserSwitchOutlined, SolutionOutlined, HomeOutlined, TeamOutlined } from '@ant-design/icons';
+import { reducer as homeReducer } from '@/models/home';
 
 export type RouteItem = {
   // 组件
@@ -22,7 +23,7 @@ const routesMap: RouteItem[] = [
     path: '/home',
     label: '首页',
     icon: <HomeOutlined style={iconStyle} />,
-    element: React.createElement(LazyLoader(() => import('../pages/home'))),
+    element: React.createElement(LazyLoader(() => import('../pages/home'), { home: homeReducer })),
   },
   {
     path: '/user',
