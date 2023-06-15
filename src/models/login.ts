@@ -1,6 +1,5 @@
 /**
  * 登录页面数据模型
- * 当你的页面不使用 redux 进行数据状态管理，可以参考。
  */
 
 import request from '@/utils/axios';
