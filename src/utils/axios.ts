@@ -1,5 +1,5 @@
 import { createPath } from 'react-router-dom';
-import { getLocalStorage } from '@/utils';
+import { getUserToken } from '@/utils';
 import history from '@/utils/history';
 import { message } from 'antd';
 import axios from 'axios';
@@ -39,9 +39,7 @@ enum ResponseCode {
   overdueCode = 401,
 }
 
-type RequestParams = {
-  [key: string]: any;
-};
+type RequestParams = { [key: string]: any };
 
 type ResponseData = {
   data?: any;
@@ -70,7 +68,7 @@ class Request<AxiosRequestConfig> {
       ...config,
       signal: abortController.signal,
       headers: {
-        Authorization: getLocalStorage('TOKEN') || 'Bearer Token',
+        Authorization: 'Bearer  ' + getUserToken(),
       } as any,
     };
   };
@@ -96,24 +94,23 @@ class Request<AxiosRequestConfig> {
       } else {
         fileName = decodeURIComponent(matched[1]);
       }
+      return Promise.resolve({ data, fileName: fileName } as any);
+    }
 
-      return Promise.resolve({ ...data, fileName: fileName });
+    if (typeof data.code === 'undefined' || data.code === ResponseCode.successCode) {
+      return Promise.resolve(data);
     }
 
     if (data.code === ResponseCode.overdueCode) {
-      message.error('登录已过期，请重新登录');
-      window.localStorage.clear();
+      message.error(data.message || '登录已过期，请重新登录');
       abortRequest();
+      window.localStorage.clear();
       this.redirectionToLogin();
       return Promise.reject(data);
     }
 
-    if (typeof data.code !== 'undefined' && data.code !== ResponseCode.successCode) {
-      data.message && message.error(data.message);
-      return Promise.reject(data);
-    }
-
-    return Promise.resolve(data);
+    message.error(data.message || '请求异常，请联系管理员');
+    return Promise.reject(data);
   };
 
   onRejectedResponse = (error: AxiosError) => {
@@ -136,7 +133,7 @@ class Request<AxiosRequestConfig> {
       case 401:
       case 403:
         abortRequest();
-        message.error('用户请登录');
+        message.error('用户暂未登录！');
         window.localStorage.clear();
         this.redirectionToLogin();
         break;

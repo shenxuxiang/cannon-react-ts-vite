@@ -1,6 +1,6 @@
 import React from 'react';
 import LazyLoader from '@/components/LazyLoader';
-import { UserSwitchOutlined, SolutionOutlined, HomeOutlined, TeamOutlined } from '@ant-design/icons';
+import { UserSwitchOutlined, SettingOutlined, HomeOutlined } from '@ant-design/icons';
 
 export type RouteItem = {
   // 组件
@@ -15,31 +15,25 @@ export type RouteItem = {
   path: string;
 };
 
-const iconStyle = { fontSize: 18, marginRight: 10, color: '#fff' };
+const iconStyle = { fontSize: 18, marginRight: 10 };
 
 const routesMap: RouteItem[] = [
   {
-    path: '/home',
-    label: '首页',
+    path: '/work-info',
+    label: '作业信息',
     icon: <HomeOutlined style={iconStyle} />,
-    element: React.createElement(LazyLoader(() => import('../pages/home'))),
+    element: React.createElement(LazyLoader(() => import('../pages/workInfo'))),
   },
   {
-    path: '/user',
-    label: '用户管理',
-    icon: <SolutionOutlined style={iconStyle} />,
+    path: '/system',
+    label: '系统管理',
+    icon: <SettingOutlined style={iconStyle} />,
     children: [
       {
-        label: '用户列表',
-        path: '/user/user-list',
-        icon: <TeamOutlined style={iconStyle} />,
-        element: React.createElement(LazyLoader(() => import('../pages/user/userList'))),
-      },
-      {
-        path: '/user/role-list',
         label: '角色列表',
+        path: '/system/role',
         icon: <UserSwitchOutlined style={iconStyle} />,
-        element: React.createElement(LazyLoader(() => import('../pages/user/roleList'))),
+        element: React.createElement(LazyLoader(() => import('../pages/system/role'))),
       },
     ],
   },
