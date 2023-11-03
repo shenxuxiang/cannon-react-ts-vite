@@ -8,7 +8,7 @@ export function isArray<T>(data: any): data is T[] {
   return getType(data) === 'array';
 }
 
-export function isObject(data: any): data is object {
+export function isObject(data: any): data is { [propName: string]: any } {
   return getType(data) === 'object';
 }
 
@@ -20,7 +20,12 @@ export function isSet<T>(data: any): data is Set<T> {
   return getType(data) === 'set';
 }
 
-export function isEmpty(data: null | undefined | object | Array<any> | Map<any, any> | Set<any>) {
+/**
+ * 判断数据是不是为空，null、undefined、false、0、' 等所有假值都将返回 true。空对象、空数组也返回 true。
+ * @param data
+ * @returns
+ */
+export function isEmpty(data: null | undefined | object | Array<any> | Map<any, any> | Set<any>): data is undefined {
   if (!data) return true;
   if (isArray(data)) {
     return data.length <= 0;
@@ -50,8 +55,9 @@ export function extName(filename: string) {
  * @param fileName 指定文件下载后的文件名
  * @param data     文件资源（blob）
  * @param extName  文件后缀
+ * @returns
  */
-export function downloadFile(fileName: string, data: any, extName = '.xlsx') {
+export function downloadFile(fileName: string, data: Blob | ArrayBuffer | DataView, extName = '.xlsx') {
   const blob = new Blob([data]);
   const eLink = document.createElement('a');
   // <a/> 上的 download 属性用于重命名一个需要下载的文件
@@ -65,7 +71,12 @@ export function downloadFile(fileName: string, data: any, extName = '.xlsx') {
   document.body.removeChild(eLink);
 }
 
-// 判断两个值是否完全相等，可以比较 +0 !== -0，NaN === NaN
+/**
+ * 判断两个值是否完全相等，可以比较 +0 !== -0，NaN === NaN
+ * @param v1
+ * @param v2
+ * @returns
+ */
 export function objectIs(v1: any, v2: any): boolean {
   if (v1 === 0 && v2 === 0) {
     return 1 / v1 === 1 / v2;
@@ -76,6 +87,12 @@ export function objectIs(v1: any, v2: any): boolean {
   }
 }
 
+/**
+ * 浅比较
+ * @param obj1
+ * @param obj2
+ * @returns
+ */
 export function shallowEqual(obj1: any, obj2: any): boolean {
   if (objectIs(obj1, obj2)) return true;
 
@@ -142,19 +159,24 @@ export function throttle(func: Function, delay: number, immediately = false) {
   };
 }
 
+type ScrollToPositionOptions = {
+  // 动画执行的次数
+  times?: number;
+  // 终点位置
+  position: number;
+  // 目标元素
+  container?: HTMLElement;
+  // 动画曲线
+  timingFunction?: TweenAttrNames;
+};
+
 /**
- * 页面，元素容器（voerflow 不是 visible）的滚动（动画）
- * @param position       终点位置
- * @param timingFunction 动画曲线
- * @param times          动画执行的次数
- * @param container      目标元素
+ * 在容器内从当前位置滚动到指定位置（JS动效）
+ * @param options
  */
-export function scrollToPosition(
-  position: number,
-  timingFunction: TweenAttrNames = 'linear',
-  times = 50,
-  container: HTMLElement = document.documentElement,
-) {
+export function scrollToPosition(options: ScrollToPositionOptions) {
+  const { position, times = 50, timingFunction = 'linear', container = document.documentElement } = options;
+
   execAnimation(0);
 
   function execAnimation(count: number) {
@@ -184,6 +206,11 @@ export function delay<T>(time: number, value: T): Promise<T> {
   });
 }
 
+/**
+ * 数据存储
+ * @param key
+ * @param value
+ */
 export function setLocalStorage(key: string, value: any) {
   if (value === null) {
     window.localStorage.clearItem(key);
@@ -192,6 +219,11 @@ export function setLocalStorage(key: string, value: any) {
   }
 }
 
+/**
+ * 获取存储数据
+ * @param key
+ * @returns
+ */
 export function getLocalStorage(key: string) {
   let value = window.localStorage.getItem(key);
   return value ? JSON.parse(value) : null;
@@ -204,7 +236,87 @@ export function getLocalStorage(key: string) {
  * @param float   保留的小数
  * @returns
  */
-export function toFixed(value: string | number, divisor = 10000, float = 2) {
-  if (!value) return '';
+export function toFixed(value: string | number | null, divisor = 10000, float = 2) {
+  // eslint-disable-next-line
+  if (value == null) return '--';
+  if (!value) return '0.00';
   return ((value as number) / divisor).toFixed(float);
+}
+
+function getPattern(name: string) {
+  return new RegExp('(?:^|;) *' + name.replace(/[\^$\\.*+?()[\]{}|]/g, '\\$&') + '=([^;]*)');
+}
+
+/**
+ * 获取指定的 cookie
+ * @param name cookie 的名称
+ * @returns
+ */
+export function getCookie(name: string) {
+  const cookie = document.cookie;
+  const reg = getPattern(name);
+  const match = reg.exec(cookie);
+  if (!match) return null;
+  return match[1];
+}
+
+/**
+ * 设置（添加）cookie
+ * @param name cookie 的名称
+ * @param value cookie 的值
+ * @param maxAge cookie的有效期（以秒为单位）
+ */
+export function setCookie(name: string, value: string, maxAge?: number) {
+  let cookie = name + '=' + value;
+  if (maxAge) cookie = cookie + '; max-age=' + maxAge;
+  document.cookie = cookie;
+}
+
+/**
+ * 获取用户 TOKEN
+ * @returns
+ */
+export function getUserToken(): string {
+  return getLocalStorage('TOKEN') || '';
+}
+
+/**
+ * 设置用户 TOKEN
+ * @param token
+ */
+export function setUserToken(token: string) {
+  setLocalStorage('TOKEN', token);
+}
+
+/**
+ * 将区域编码格式化，[省，市，区，镇，村]
+ * @param regionCode 区域编码
+ */
+export function formatRegionCode(regionCode: string) {
+  if (!regionCode) return [];
+
+  let length = 0;
+
+  switch (regionCode.length) {
+    case 2:
+      length = 1;
+      break;
+    case 4:
+      length = 2;
+      break;
+    case 6:
+      length = 3;
+      break;
+    case 9:
+      length = 4;
+      break;
+    default:
+      length = 5;
+  }
+
+  const province = regionCode.slice(0, 2);
+  const city = regionCode.slice(0, 4);
+  const district = regionCode.slice(0, 6);
+  const town = regionCode.slice(0, 9);
+  return [province, city, district, town, regionCode].slice(0, length);
 }
