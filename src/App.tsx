@@ -1,13 +1,22 @@
 import { unstable_HistoryRouter as Router } from 'react-router-dom';
-import React, { memo, useState, useMemo } from 'react';
 import BasicContext from '@/common/BasicContext';
+import React, { memo, useMemo } from 'react';
+import useReducer from '@/utils/useReducer';
 import zhCN from 'antd/es/locale/zh_CN';
 import { ConfigProvider } from 'antd';
 import history from '@/utils/history';
 import Routers from '@/routers';
 
+function initialState() {
+  return {
+    userInfo: {},
+    userMenuItems: [],
+    userPermissions: new Map(),
+  };
+}
+
 function App() {
-  const [state, setState] = useState({ userInfo: {}, menuItems: [], permissions: new Map() });
+  const [state, setState] = useReducer(initialState);
 
   const context = useMemo(() => {
     return {
