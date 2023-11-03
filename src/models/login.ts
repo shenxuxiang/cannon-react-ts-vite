@@ -1,7 +1,3 @@
-/**
- * 登录页面数据模型
- */
-
 import request from '@/utils/axios';
 
 export const signIn = (query: any) => request.post('/v1.0/login/admin', query);
