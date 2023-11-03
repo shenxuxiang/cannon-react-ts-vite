@@ -1,83 +1,69 @@
-import React, { useLayoutEffect, useCallback, useEffect, useRef } from 'react';
-import { useNavigate, useLocation, Outlet, matchPath } from 'react-router-dom';
 import { MenuUnfoldOutlined, MenuFoldOutlined, UserOutlined } from '@ant-design/icons';
-import { Popover, Layout, Avatar, Menu, message } from 'antd';
+import { useNavigate, useLocation, Outlet, matchPath } from 'react-router-dom';
+import React, { useCallback, useEffect, memo } from 'react';
+import { Popover, Layout, Avatar, Menu, Spin } from 'antd';
+import { useBasicContext } from '@/common/BasicContext';
 import avatarURL from '@/assets/images/avatar.png';
 import useReducer from '@/utils/useReducer';
 import logo from '@/assets/images/logo.png';
-import { filterMenuTree } from '@/routers';
 import type { MenuItem } from '@/routers';
-import { getLocalStorage } from '@/utils';
+import { getMenuItems } from '@/routers';
 import { signOut } from '@/models/login';
+import { effects } from '@/models';
+import { isEmpty } from '@/utils';
 import './index.less';
 
 const { Content, Sider, Header, Footer } = Layout;
 
 const initialState = () => {
   return {
-    menuItems: [] as MenuItem[],
     selectedMenuKeys: ['/'],
     collapsed: false,
     openKeys: ['/'],
-    userName: '',
-    avatar: '',
   };
 };
 
 const MainLayout: React.FC = () => {
   const [state, setState] = useReducer(initialState);
-  const { avatar, userName, menuItems, collapsed, selectedMenuKeys } = state;
+  const { openKeys, collapsed, selectedMenuKeys } = state;
+  const {
+    basic: { userInfo, userMenuItems, userPermissions },
+    update: updateBasicContext,
+  } = useBasicContext();
 
   const navigate = useNavigate();
   const location = useLocation();
-  const menuItemsRef = useRef<any>(null);
-  const permissionsRef = useRef<any>(null);
-  // 终止程序
-  const endProcessRef = useRef(false);
-
-  useLayoutEffect(() => {
-    const userInfo = getLocalStorage('USER_INFO');
-
-    if (!userInfo) {
-      endProcessRef.current = true;
-      return;
-    }
-
-    // resourceList 为用户菜单权限
-    const { avatar, username: userName, resourceList } = userInfo;
-    const permissions = flatMenuTree(resourceList || []);
-    const menuItems = filterMenuTree(permissions);
-    permissionsRef.current = permissions;
-    menuItemsRef.current = menuItems;
-    setState({ menuItems, avatar, userName });
-  }, []);
 
   useEffect(() => {
-    if (endProcessRef.current) {
-      message.warning('请先完成用户登录');
-      navigate('/login');
+    if (isEmpty(userInfo)) {
+      // 获取用户信息
+      effects.queryUserInfo().then((response: any) => {
+        const userInfo = response.data || {};
+        // resourceTree 为用户路由权限
+        const { resourceTree } = userInfo;
+        const userPermissions = handleResourceTreeToMap(resourceTree || []);
+        const userMenuItems = getMenuItems(userPermissions);
+
+        updateBasicContext(() => ({ userInfo, userPermissions, userMenuItems }));
+      });
       return;
     }
 
     const { pathname } = location;
     // 每当访问 '/' 路径时，重定向到菜单的第一项。
     if (pathname === '/') {
-      const firstItem = findFirstMenuItem(menuItemsRef.current);
-      firstItem?.key && navigate(firstItem.key);
+      const homePage = getHomePagePath(userMenuItems);
+      homePage && navigate(homePage);
       return;
     }
 
-    if (!routerGuard(permissionsRef.current, pathname)) {
+    if (!routerGuard(userPermissions, pathname)) {
       navigate('/404');
       return;
     }
 
-    const regexp = /^(\/[^/?#]+)(\/[^/?#]+)+/;
-    let openKeys: string[] = [];
-    if (regexp.exec(pathname)) openKeys = [RegExp.$1];
-
-    setState({ selectedMenuKeys: [pathname], openKeys });
-  }, [location]);
+    setState({ selectedMenuKeys: [pathname], openKeys: getExpandKeys(pathname) });
+  }, [location, userInfo, userMenuItems, userPermissions]);
 
   const handleSelectMenu = useCallback((event: any) => {
     navigate(event.key);
@@ -88,6 +74,7 @@ const MainLayout: React.FC = () => {
     setState({ openKeys: keys });
   }, []);
 
+  // 退出登录
   const handleSignOut = () => {
     // 先调用退出接口。不管结果如何都清空本地数据缓存。
     signOut().finally(() => {
@@ -96,38 +83,46 @@ const MainLayout: React.FC = () => {
     });
   };
 
+  // 修改密码
   const handleResetPassword = () => {
-    navigate('/login/passwd');
+    navigate('/update-passwd');
   };
 
   const handleTriggerSlider = () => {
     setState((prevState) => ({ collapsed: !prevState.collapsed }));
   };
 
+  if (isEmpty(userInfo))
+    return (
+      <Spin delay={2000} spinning size="large">
+        <div style={{ height: '100vh' }} />
+      </Spin>
+    );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider width={240} collapsible theme="dark" trigger={null} collapsed={collapsed}>
-        <div className="hn-picc-logo">
-          <img src={logo} className="hn-picc-logo-img" />
-          <div className={`hn-picc-logo-title ${collapsed ? ' hide' : ''}`}>xxx中台系统</div>
+      <Sider width={240} collapsible theme="light" trigger={null} collapsed={collapsed}>
+        <div className="qm-logo">
+          <img src={logo} className="qm-logo-img" />
+          <div className={`qm-logo-title ${collapsed ? ' hide' : ''}`}>xxx后台管理系统</div>
         </div>
         <Menu
-          theme="dark"
+          theme="light"
           mode="inline"
-          items={menuItems}
-          openKeys={state.openKeys}
+          openKeys={openKeys}
+          items={userMenuItems}
           onSelect={handleSelectMenu}
           selectedKeys={selectedMenuKeys}
           onOpenChange={handleChangeOpenKeys}
         />
       </Sider>
-      <Layout className="hn-picc-body">
-        <Header className="hn-picc-body-header">
+      <Layout className="qm-body">
+        <Header className="qm-body-header">
           <span onClick={handleTriggerSlider}>
             {collapsed ? (
-              <MenuUnfoldOutlined className="hn-picc-menu-slider-button" />
+              <MenuUnfoldOutlined className="qm-menu-slider-button" />
             ) : (
-              <MenuFoldOutlined className="hn-picc-menu-slider-button" />
+              <MenuFoldOutlined className="qm-menu-slider-button" />
             )}
           </span>
           <Popover
@@ -135,57 +130,80 @@ const MainLayout: React.FC = () => {
             placement="bottomLeft"
             content={
               <>
-                <a className="hn-picc-signout-button" onClick={handleSignOut}>
+                <a className="qm-signout-button" onClick={handleSignOut}>
                   退出登录
                 </a>
-                <a className="hn-picc-signout-button" onClick={handleResetPassword}>
+                <a className="qm-signout-button" onClick={handleResetPassword}>
                   修改密码
                 </a>
               </>
             }
           >
-            <div className="hn-picc-body-header-avatar">
-              <Avatar size={48} icon={<UserOutlined />} src={avatar || avatarURL} />
-              <span className="hn-picc-body-header-userName">{userName}</span>
+            <div className="qm-body-header-avatar">
+              <Avatar size={48} icon={<UserOutlined />} src={userInfo.avatar || avatarURL} />
+              <span className="qm-body-header-userName">{userInfo.username}</span>
             </div>
           </Popover>
         </Header>
         <Content>
           <Outlet />
         </Content>
-        <Footer className="hn-picc-body-footer">安徽阡陌网络科技有限公司 ©2022 Created by Qianmo</Footer>
+        <Footer className="qm-body-footer">安徽阡陌网络科技有限公司 ©2022 Created by Qianmo</Footer>
       </Layout>
     </Layout>
   );
 };
 
-export default MainLayout;
+export default memo(MainLayout);
 
-// 将菜单列表扁平化
-function flatMenuTree(menuList: any[]) {
-  const stack = [...menuList];
-  const menuMap = new Map<string, object>();
+/**
+ * 将 resourceTree 转换成 Map 类型的数据结构。
+ * @param resourceTree
+ * @returns
+ */
+function handleResourceTreeToMap(resourceTree: any[]) {
+  const stack = [...resourceTree];
+  const menuMap = new Map<string, { name: string; path: string }>();
 
   while (stack.length) {
     const item = stack.shift();
-    const { path, children, name } = item;
-    menuMap.set(path, { path, name });
-    children?.length && stack.push(...children);
+    const { code, children, name, type, path } = item;
+    let routePath = '';
+    if (type === 1 || type === 2) routePath = code;
+    if (type === 3) routePath = path;
+    if (routePath) {
+      menuMap.set(routePath, { path: routePath, name });
+      children?.length && stack.push(...children);
+    }
   }
 
   return menuMap;
 }
-// 路由守卫
+
+/**
+ * 路由守卫
+ * @param permissions 路由权限集合
+ * @param pathname 页面路径
+ * @returns
+ */
 function routerGuard(permissions: Map<string, object>, pathname: string) {
-  if (matchPath('/login/:status', pathname) || pathname === '/404') return true;
+  if (pathname === '/login' || pathname === '/404') return true;
 
   if (permissions.has(pathname)) return true;
+
+  let matched = null;
+  permissions.forEach((_, k) => {
+    if (matched!) return;
+    matched = matchPath(k, pathname);
+  });
+
+  if (matched) return true;
 
   return false;
 }
 
 // 找出菜单的第一项。
-function findFirstMenuItem(menuItems: MenuItem[]) {
+function getHomePagePath(menuItems: MenuItem[]) {
   if (!menuItems?.length) return null;
 
   const stack = [menuItems[0]];
@@ -195,5 +213,18 @@ function findFirstMenuItem(menuItems: MenuItem[]) {
     if (firstItem?.children?.length) stack.push(firstItem.children[0]);
   }
 
-  return firstItem;
+  return firstItem?.key ?? null;
+}
+
+function getExpandKeys(pathname: string) {
+  const regexp = /(\/[^/?#]+)/g;
+  const expandKeys: string[] = [];
+  let i = 0;
+  while (regexp.test(pathname)) {
+    const previousValue = expandKeys[i - 1] || '';
+    expandKeys.push(previousValue + RegExp.$1);
+    i++;
+  }
+
+  return expandKeys;
 }
