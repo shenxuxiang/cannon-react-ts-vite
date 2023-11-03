@@ -1,0 +1,61 @@
+.form_item {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 360px;
+  height: 40px;
+  margin-top: 80px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ddd;
+  & + & {
+    margin-top: 40px;
+  }
+}
+.input_prefix_icon {
+  font-size: 28px;
+  color: #1a72fe;
+}
+.input {
+  flex: 1 0 0;
+  outline: none;
+  border: none;
+  height: 32px;
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.84);
+  box-sizing: border-box;
+  letter-spacing: 1px;
+  opacity: 0.99;
+}
+.passwd {
+  letter-spacing: 3px;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 6px 12px;
+}
+
+.input::placeholder,
+.input::-webkit-input-placeholder,
+.input::-moz-placeholder {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: normal;
+  letter-spacing: 1px;
+  color: #a9a9a9;
+}
+.warning_tips {
+  position: absolute;
+  top: 30px;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  color: #ff0000;
+  opacity: 0;
+  &.show {
+    transition: all 0.3s ease;
+    transform: translateY(20px);
+    opacity: 1;
+  }
+}
