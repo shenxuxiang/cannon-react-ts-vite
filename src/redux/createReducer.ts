@@ -2,9 +2,7 @@
  * 该文件文件引入到 @/redux/index，避免造成循环加载。
  */
 import { isEmpty } from '@/utils';
-import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
-
-export type Effect = (query?: any) => (dispatch: Dispatch, getState?: any) => Promise<any>;
+import type { AnyAction } from '@reduxjs/toolkit';
 
 type CreateReducerOptions<T, E> = {
   effects: E;
