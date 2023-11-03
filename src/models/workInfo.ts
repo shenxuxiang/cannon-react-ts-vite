@@ -16,11 +16,9 @@ const effects = {
 export type WorkInfoModel = {};
 
 const { reducer, actions } = createReducer<WorkInfoModel, typeof effects>({
-  name: 'workinfo',
-  initialState: {
-    dataSource: {},
-  },
   effects,
+  name: 'workinfo',
+  initialState: {},
 });
 
 export { reducer as default, actions };
