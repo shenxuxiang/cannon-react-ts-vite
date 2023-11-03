@@ -1,45 +1,51 @@
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { Button, message, Checkbox, ConfigProvider } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { setUserToken, setCookie, getCookie } from '@/utils';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Button, message, ConfigProvider } from 'antd';
 import type { Rule } from '@/components/LoginInput';
+import { LockOutlined } from '@ant-design/icons';
+import { updatePassword } from '@/models/login';
 import Input from '@/components/LoginInput';
 import useReducer from '@/utils/useReducer';
 import classes from './index.module.less';
 import encrypto from '@/utils/encrypto';
-import { signIn } from '@/models/login';
 
 type Rules = { [propName: string]: Array<Rule> };
 
 function initialState() {
   return {
-    loading: false,
     userName: '',
     password: '',
+    loading: false,
+    newPassword: '',
+    confirmPassword: '',
     memorizeUser: false,
+    isUpdatePassword: false,
   };
 }
 
 function Login(props: any) {
   const [state, setState] = useReducer(initialState);
-  const { loading, userName, password, memorizeUser } = state;
-  const { location, navigate } = props;
-
-  useEffect(() => {
-    const userName = getCookie('USER_NAME_RECORD');
-    userName && setState({ userName });
-  }, []);
-
-  const changeUserName = useCallback((event: any) => {
-    setState({ userName: event.target.value });
-  }, []);
+  const { loading, password, newPassword, confirmPassword } = state;
+  const { navigate } = props;
+  const newPasswordRef = useRef<any>();
+  const confirmPasswordRef = useRef<any>();
 
   const changePassword = useCallback((event: any) => {
     setState({ password: event.target.value });
   }, []);
 
-  const changeMemorizeUser = useCallback((event: any) => {
-    setState({ memorizeUser: event.target.checked });
+  const changeNewPassword = useCallback(
+    (event: any) => {
+      const value = event.target.value;
+      setState({ newPassword: value });
+      if (confirmPassword && confirmPassword === value) {
+        confirmPasswordRef.current.validator();
+      }
+    },
+    [confirmPassword],
+  );
+
+  const changeConfirmPassword = useCallback((event: any) => {
+    setState({ confirmPassword: event.target.value });
   }, []);
 
   const validator = useCallback((values: object, rules: Rules) => {
@@ -71,44 +77,30 @@ function Login(props: any) {
     return true;
   }, []);
 
-  const handleNavigateBack = useCallback(() => {
-    // 先查看 location.search 上是否有重定向的需要。
-    const matched = /\??redirection=([^&#]+)/.exec(location.search);
-    if (matched) {
-      // 需要先解码，然后在进行重定向（回到原先的那个页面）。
-      navigate(`${decodeURIComponent(matched[1])}`);
-    } else {
-      // 否则，直接回到目录首页。在 MainLayout 组件中，我们对 pathname === '/' 做了逻辑判断。
-      navigate('/');
-    }
-  }, [location, navigate]);
-
-  // 用户登录
-  const handleLogin = useCallback(() => {
-    if (validator({ password, userName }, rules1)) {
+  // 用户修改密码
+  const handleUpdatePassword = useCallback(() => {
+    if (validator({ password, newPassword, confirmPassword }, rules2)) {
       setState({ loading: true });
-      const params = { username: userName, password: encrypto(password) };
-
-      signIn(params)
-        .then((response: any) => {
-          const { token } = response?.data ?? {};
-          message.success('登录成功');
-          setUserToken(token);
-
-          // 有效期 31 天
-          memorizeUser && setCookie('USER_NAME_RECORD', userName, 2678400);
-          handleNavigateBack();
+      const params = {
+        oldPassword: encrypto(password),
+        newPassword: encrypto(newPassword),
+        confirmPassword: encrypto(confirmPassword),
+      };
+      updatePassword(params)
+        .then(() => {
+          message.success('密码修改成功！');
+          navigate('/login');
         })
         .finally(() => setState({ loading: false }));
     }
-  }, [password, userName, memorizeUser, handleNavigateBack]);
+  }, [password, newPassword, confirmPassword, navigate]);
 
   useEffect(() => {
     const handle = (event: any) => {
       if (event.code === 'Enter') {
         event.stopPropagation();
         event.preventDefault();
-        handleLogin();
+        handleUpdatePassword();
       }
     };
 
@@ -117,15 +109,31 @@ function Login(props: any) {
     return () => {
       window.removeEventListener('keyup', handle);
     };
-  }, [handleLogin]);
+  }, [handleUpdatePassword]);
 
-  const rules1: Rules = useMemo(
+  const rules2: Rules = useMemo(
     () => ({
-      userName: [{ message: '用户名不能为空', pattern: /^\w+$/ }],
       password: [
         {
           message: '密码必须包含字母、数字、特殊字符（~！%@#$），密码长度为8-16位',
           pattern: /^(?=.*\d+)(?=.*[~!@#$%]+)(?=.*[A-Za-z]+)[0-9a-zA-Z~!@#$%]{8,16}$/,
+        },
+      ],
+      newPassword: [
+        {
+          message: '密码必须包含字母、数字、特殊字符（~！%@#$），密码长度为8-16位',
+          pattern: /^(?=.*\d+)(?=.*[~!@#$%]+)(?=.*[A-Za-z]+)[0-9a-zA-Z~!@#$%]{8,16}$/,
+        },
+      ],
+      confirmPassword: [
+        {
+          validator: (input: string) => {
+            if (newPasswordRef.current.input.value !== input) {
+              return '两次输入的密码不一致';
+            } else {
+              return true;
+            }
+          },
         },
       ],
     }),
@@ -140,43 +148,40 @@ function Login(props: any) {
           <h1 className={classes.title}>农机作业监管平台</h1>
           <p className={classes.subtitle}>让农机监管更方便的智能化平台</p>
           <Input
-            type="text"
-            value={userName}
-            rules={rules1.userName}
-            placeholder="请输入用户名"
-            onChange={changeUserName}
-            prefixIcon={<UserOutlined />}
+            type="password"
+            value={password}
+            rules={rules2.password}
+            placeholder="请输入旧密码"
+            onChange={changePassword}
+            prefixIcon={<LockOutlined />}
           />
           <Input
             type="password"
-            value={password}
-            rules={rules1.password}
-            onChange={changePassword}
-            placeholder="请输入登陆密码"
+            value={newPassword}
+            ref={newPasswordRef}
+            placeholder="请输入新密码"
+            rules={rules2.newPassword}
+            onChange={changeNewPassword}
             prefixIcon={<LockOutlined />}
           />
-
-          <div className={classes.form_item} style={{ border: 'none', marginTop: 30 }}>
-            <ConfigProvider theme={{ token: { colorPrimary: '#1A72FE' } }}>
-              <Checkbox
-                checked={memorizeUser}
-                style={{ marginLeft: 6 }}
-                onChange={changeMemorizeUser}
-                className={classes.input_prefix_icon}
-              />
-            </ConfigProvider>
-            <p className={classes.memorize_user_name}>记住用户名</p>
-          </div>
-
+          <Input
+            type="password"
+            value={confirmPassword}
+            ref={confirmPasswordRef}
+            placeholder="请再次确认密码"
+            prefixIcon={<LockOutlined />}
+            rules={rules2.confirmPassword}
+            onChange={changeConfirmPassword}
+          />
           <ConfigProvider theme={{ token: { colorPrimary: '#1A72FE' } }}>
             <Button
-              htmlType="submit"
               type="primary"
               className={classes.submit_button}
-              onClick={handleLogin}
+              onClick={handleUpdatePassword}
               loading={loading}
+              style={{ marginTop: 40 }}
             >
-              登录
+              确认修改
             </Button>
           </ConfigProvider>
         </div>

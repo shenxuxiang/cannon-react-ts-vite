@@ -1,17 +1,34 @@
 /**
- * 该数据模型作为公共数据模型使用，不局限于某一个功能或页面。
- * 该数据模型会自动绑定到每个页面，具体逻辑你可以在 '@/components/LazyLoader' 组件中找到答案。
- * 具体使用场景可以参考 '@/pages/home' 页面的代码。
- * 如果你的页面不使用 redux 进行数据状态管理，可以参考 '@/pages/login' 页面的代码
- * 注意，如果你不使用它请不要删除该文件。
+ * userInfo 这样的基础数据已经注入到 BasicContext 中，所以在这里就不用再次注入到 model 层了。
+ * actions 中的属性默认将会注入到页面 props 中，如果不想将其注入到页面，就不要在 actions 中添加，建议直接使用 effects 中定义的方法。
  */
-
 import request from '@/utils/axios';
 import type { Dispatch } from 'redux';
 import createReducer from '@/redux/createReducer';
 
-export const effects = {};
+const INITIAL_DATA = {
+  workTypeList: [],
+};
 
-export const actions = {};
+export const effects = {
+  queryUserInfo: () => request.post('/v1.0/sysUser/info'),
+  queryWorkTypeList: () => request.post('/v1.0/sysDict/type/list'),
+};
 
-export const reducer = createReducer(actions);
+export const actions = {
+  queryWorkTypeList: () => {
+    return (dispatch: Dispatch) => {
+      return effects.queryWorkTypeList().then((response: any) => {
+        dispatch({
+          type: 'queryWorkTypeList',
+          payload: {
+            workTypeList: response.data?.map((item: any) => ({ value: item.dictId, label: item.dictName })) ?? [],
+          },
+        });
+        return response;
+      });
+    };
+  },
+};
+
+export default createReducer(actions, INITIAL_DATA);
