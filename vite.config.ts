@@ -72,7 +72,9 @@ export default defineConfig(({ mode }) => {
       // },
       preprocessorOptions: {
         less: {
-          modifyVars: {},
+          modifyVars: {
+            themeColor: '#6C69FF',
+          },
           globalVars: {},
           additionalData: '',
           javascriptEnable: true,
