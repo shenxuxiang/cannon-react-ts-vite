@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { MenuItem } from '@/routers';
 
+<<<<<<< HEAD
 // Context 初始化数据类型
 type BasicContextInitialDataType = {
   homeURL: string | null;
@@ -31,3 +32,27 @@ export const BasicContext = createContext<BasicContextType>({
 export { BasicContext as default };
 
 export const useBasicContext = () => useContext(BasicContext);
+=======
+type BasicContextType = {
+  basic: {
+    userMenuItems: MenuItem[];
+    userInfo: { [propName: string]: any };
+    userPermissions: Map<string, { path: string; name: string }>;
+    [propName: string]: any;
+  };
+  update: (value: any) => any;
+};
+
+const BasicContext = createContext<BasicContextType>({
+  basic: {
+    userInfo: {},
+    userMenuItems: [],
+    userPermissions: new Map(),
+  },
+  update: () => {},
+});
+
+const useBasicContext = () => useContext(BasicContext);
+
+export { BasicContext as default, useBasicContext };
+>>>>>>> f8bdc9e (feat: update)
