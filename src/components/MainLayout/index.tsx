@@ -1,13 +1,12 @@
 import { MenuUnfoldOutlined, MenuFoldOutlined, UserOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation, Outlet, matchPath } from 'react-router-dom';
+import { getMenuItems, getPermissions, getHomePagePath, routerGuard } from '@/routers';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { Popover, Layout, Avatar, Menu, Spin } from 'antd';
 import { useBasicContext } from '@/common/BasicContext';
 import React, { useCallback, useEffect } from 'react';
 import avatarURL from '@/assets/images/avatar.png';
 import useReducer from '@/utils/useReducer';
 import logo from '@/assets/images/logo.png';
-import type { MenuItem } from '@/routers';
-import { getMenuItems } from '@/routers';
 import { queryUserInfo } from '@/models';
 import { signOut } from '@/models/login';
 import { isEmpty } from '@/utils';
@@ -41,7 +40,7 @@ const MainLayout: React.FC = () => {
         const userInfo = response.data || {};
         // resourceTree 为用户路由权限
         const { resourceTree } = userInfo;
-        const userPermissions = handleResourceTreeToMap(resourceTree || []);
+        const userPermissions = getPermissions(resourceTree || []);
         const userMenuItems = getMenuItems(userPermissions);
 
         updateBasicContext(() => ({ userInfo, userPermissions, userMenuItems }));
@@ -155,66 +154,6 @@ const MainLayout: React.FC = () => {
 };
 
 export default MainLayout;
-
-/**
- * 将 resourceTree 转换成 Map 类型的数据结构。
- * @param resourceTree
- * @returns
- */
-function handleResourceTreeToMap(resourceTree: any[]) {
-  const stack = [...resourceTree];
-  const menuMap = new Map<string, { name: string; path: string }>();
-
-  while (stack.length) {
-    const item = stack.shift();
-    const { code, children, name, type, path } = item;
-    let routePath = '';
-    if (type === 1 || type === 2) routePath = code;
-    if (type === 3) routePath = path;
-    if (routePath) {
-      menuMap.set(routePath, { path: routePath, name });
-      children?.length && stack.push(...children);
-    }
-  }
-
-  return menuMap;
-}
-
-/**
- * 路由守卫
- * @param permissions 路由权限集合
- * @param pathname 页面路径
- * @returns
- */
-function routerGuard(permissions: Map<string, object>, pathname: string) {
-  if (pathname === '/login' || pathname === '/404') return true;
-
-  if (permissions.has(pathname)) return true;
-
-  let matched = null;
-  permissions.forEach((_, k) => {
-    if (matched!) return;
-    matched = matchPath(k, pathname);
-  });
-
-  if (matched) return true;
-
-  return false;
-}
-
-// 找出菜单的第一项。
-function getHomePagePath(menuItems: MenuItem[]) {
-  if (!menuItems?.length) return null;
-
-  const stack = [menuItems[0]];
-  let firstItem = {} as MenuItem;
-  while (stack.length) {
-    firstItem = stack.shift()!;
-    if (firstItem?.children?.length) stack.push(firstItem.children[0]);
-  }
-
-  return firstItem?.key ?? null;
-}
 
 function getExpandKeys(pathname: string) {
   const regexp = /(\/[^/?#]+)/g;
