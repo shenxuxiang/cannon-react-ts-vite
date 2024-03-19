@@ -89,7 +89,7 @@ const pathnameListOfNotValidate = new Set(['/404', '/login', '/update-passwd']);
 /**
  * 路由守卫
  * @param permissions 路由权限集合
- * @param pathname 页面路径
+ * @param pathname 页面路径（不含 hash、search）
  * @returns
  */
 export function routerGuard(permissions: Map<string, object>, pathname: string) {
