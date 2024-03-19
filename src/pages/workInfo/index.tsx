@@ -1,10 +1,10 @@
 import type { Dayjs } from 'dayjs';
-import { queryTableList } from '@/models/workInfo';
 import { ContentFormTable } from 'qm-vnit';
+import { queryTableList } from '@/api/workInfo';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Button, Popconfirm, Space, message } from 'antd';
 
-function Page(props: any) {
+function Page() {
   const columns = useMemo(() => {
     return [
       {
@@ -64,7 +64,6 @@ function Page(props: any) {
   }, []);
 
   const handleValidateFormModels = useCallback((values: any) => {
-    console.log(values);
     if (!values.sex) {
       message.warning('性别不能为空！');
       return false;

@@ -2,8 +2,8 @@
   "compilerOptions": {
     "noEmit": true,
     "strict": true,
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "module": "ESNext",
     "target": "ESNext",
     "jsx": "react",
@@ -24,8 +24,9 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
       "@/*": [ "./src/*" ]
-    }
+    },
+    "types": [ "@testing-library/jest-dom" ]
   },
-  "include": ["src"],
+  "include": ["src", "test", "vitest.setup.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

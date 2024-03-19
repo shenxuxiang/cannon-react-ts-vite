@@ -1,15 +1,12 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined, UserOutlined } from '@ant-design/icons';
-import { getMenuItems, getPermissions, getHomePagePath, routerGuard } from '@/routers';
+import { MenuUnfoldOutlined, MenuFoldOutlined, UserOutlined, SlackSquareOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { Popover, Layout, Avatar, Menu, Spin } from 'antd';
 import { useBasicContext } from '@/common/BasicContext';
 import React, { useCallback, useEffect } from 'react';
+import { Popover, Layout, Avatar, Menu } from 'antd';
 import avatarURL from '@/assets/images/avatar.png';
 import useReducer from '@/utils/useReducer';
-import logo from '@/assets/images/logo.png';
-import { queryUserInfo } from '@/models';
-import { signOut } from '@/models/login';
-import { isEmpty } from '@/utils';
+import { signOut } from '@/api/login';
+import { splitPath } from '@/utils';
 import './index.less';
 
 const { Content, Sider, Header, Footer } = Layout;
@@ -23,46 +20,19 @@ const initialState = () => {
 };
 
 const MainLayout: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [state, setState] = useReducer(initialState);
   const { openKeys, collapsed, selectedMenuKeys } = state;
   const {
-    basic: { userInfo, userMenuItems, userPermissions },
-    update: updateBasicContext,
+    context: { userInfo, userMenuItems, homeURL },
   } = useBasicContext();
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
   useEffect(() => {
-    if (isEmpty(userInfo)) {
-      // 获取用户信息
-      queryUserInfo().then((response: any) => {
-        const userInfo = response.data || {};
-        // resourceTree 为用户路由权限
-        const { resourceTree } = userInfo;
-        const userPermissions = getPermissions(resourceTree || []);
-        const userMenuItems = getMenuItems(userPermissions);
-
-        updateBasicContext(() => ({ userInfo, userPermissions, userMenuItems }));
-      });
-      return;
-    }
-
     const { pathname } = location;
-    // 每当访问 '/' 路径时，重定向到菜单的第一项。
-    if (pathname === '/') {
-      const homePage = getHomePagePath(userMenuItems);
-      homePage && navigate(homePage);
-      return;
-    }
 
-    if (!routerGuard(userPermissions, pathname)) {
-      navigate('/404');
-      return;
-    }
-
-    setState({ selectedMenuKeys: [pathname], openKeys: getExpandKeys(pathname) });
-  }, [location, userInfo, userMenuItems, userPermissions]);
+    setState({ selectedMenuKeys: [pathname], openKeys: splitPath(pathname) });
+  }, [location]);
 
   const handleSelectMenu = useCallback((event: any) => {
     navigate(event.key);
@@ -87,23 +57,26 @@ const MainLayout: React.FC = () => {
     navigate('/update-passwd');
   };
 
+  // 收缩、展开菜单栏
   const handleTriggerSlider = () => {
     setState((prevState) => ({ collapsed: !prevState.collapsed }));
   };
 
-  if (isEmpty(userInfo))
-    return (
-      <Spin delay={2000} spinning size="large">
-        <div style={{ height: '100vh' }} />
-      </Spin>
-    );
+  const goHome = () => {
+    homeURL && navigate(homeURL);
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider width={240} collapsible theme="light" trigger={null} collapsed={collapsed}>
-        <div className="qm-logo">
-          <img src={logo} className="qm-logo-img" />
-          <div className={`qm-logo-title ${collapsed ? ' hide' : ''}`}>xxx后台管理系统</div>
+        <div className="qm-logo" onClick={goHome}>
+          <SlackSquareOutlined
+            style={{
+              transform: collapsed ? 'translateX(18px) scale(1.2)' : 'translateX(5px) scale(1)',
+            }}
+            className="qm-logo-icon"
+          />
+          <div className={`qm-logo-title ${collapsed ? ' hide' : ''}`}>{import.meta.env.VITE_TITLE}</div>
         </div>
         <Menu
           theme="light"
@@ -154,16 +127,3 @@ const MainLayout: React.FC = () => {
 };
 
 export default MainLayout;
-
-function getExpandKeys(pathname: string) {
-  const regexp = /(\/[^/?#]+)/g;
-  const expandKeys: string[] = [];
-  let i = 0;
-  while (regexp.test(pathname)) {
-    const previousValue = expandKeys[i - 1] || '';
-    expandKeys.push(previousValue + RegExp.$1);
-    i++;
-  }
-
-  return expandKeys;
-}

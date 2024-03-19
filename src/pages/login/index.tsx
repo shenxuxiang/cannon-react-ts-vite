@@ -1,33 +1,52 @@
+import { setUserToken, getUserToken, setCookie, getCookie, encrypto, useReducer } from '@/utils';
+import { Button, message, Checkbox, ConfigProvider, Spin } from 'antd';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { Button, message, Checkbox, ConfigProvider } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { setUserToken, setCookie, getCookie } from '@/utils';
+import { useBasicContext } from '@/common/BasicContext';
 import type { Rule } from '@/components/LoginInput';
 import Input from '@/components/LoginInput';
-import useReducer from '@/utils/useReducer';
 import classes from './index.module.less';
-import encrypto from '@/utils/encrypto';
-import { signIn } from '@/models/login';
+import { signIn } from '@/api/login';
 
 type Rules = { [propName: string]: Array<Rule> };
 
 function initialState() {
   return {
-    loading: false,
     userName: '',
     password: '',
+    loading: false,
+    spinning: true,
     memorizeUser: false,
   };
 }
 
 function Login(props: any) {
   const [state, setState] = useReducer(initialState);
-  const { loading, userName, password, memorizeUser } = state;
-  const { location, navigate } = props;
+  const { location, navigate, queryUserInfo } = props;
+  const { updateContext: updateBasicContext } = useBasicContext();
+  const { loading, userName, password, memorizeUser, spinning } = state;
 
   useEffect(() => {
-    const userName = getCookie('USER_NAME_RECORD');
-    userName && setState({ userName });
+    // 如果 Token 存在，则直接获取用户信息并跳转到网站首页。否则需要用户手动登录。
+    if (getUserToken()) {
+      // 菜单和用户访问权限都在用户信息中。
+      queryUserInfo()
+        .then(async (res: any) => {
+          updateBasicContext({ userInfo: res.data });
+          // 回到首页，在 <App /> 中进行路由重定向
+          navigate('/');
+        })
+        .catch(() => {
+          // 用户信息获取失败时，必须手动完成登录。
+          const userName = getCookie('USER_NAME_RECORD');
+          userName && setState({ userName });
+        })
+        .finally(() => setState({ spinning: false }));
+    } else {
+      setState({ spinning: false });
+      const userName = getCookie('USER_NAME_RECORD');
+      userName && setState({ userName });
+    }
   }, []);
 
   const changeUserName = useCallback((event: any) => {
@@ -78,7 +97,7 @@ function Login(props: any) {
       // 需要先解码，然后在进行重定向（回到原先的那个页面）。
       navigate(`${decodeURIComponent(matched[1])}`);
     } else {
-      // 否则，直接回到目录首页。在 MainLayout 组件中，我们对 pathname === '/' 做了逻辑判断。
+      // 回到首页，在 <App /> 中进行路由重定向
       navigate('/');
     }
   }, [location, navigate]);
@@ -90,14 +109,24 @@ function Login(props: any) {
       const params = { username: userName, password: encrypto(password) };
 
       signIn(params)
-        .then((response: any) => {
-          const { token } = response?.data ?? {};
+        .then(async (response: any) => {
           message.success('登录成功');
+          const { token } = response?.data ?? {};
+          // 存储 Token 到本地缓存
           setUserToken(token);
-
           // 有效期 31 天
           memorizeUser && setCookie('USER_NAME_RECORD', userName, 2678400);
-          handleNavigateBack();
+
+          try {
+            // 获取用户信息
+            const res = await queryUserInfo();
+            updateBasicContext({ userInfo: res.data });
+
+            handleNavigateBack();
+          } catch (error) {
+            message.warning('用户信息获取失败~');
+            console.log(error);
+          }
         })
         .finally(() => setState({ loading: false }));
     }
@@ -132,13 +161,21 @@ function Login(props: any) {
     [],
   );
 
+  if (spinning) {
+    return (
+      <Spin delay={500} spinning={spinning} size="large">
+        <div style={{ height: '100vh' }} />
+      </Spin>
+    );
+  }
+
   return (
     <section className={classes.login_page}>
       <div className={classes.container}>
         <div className={classes.illustration} />
         <div className={classes.content}>
-          <h1 className={classes.title}>农机作业监管平台</h1>
-          <p className={classes.subtitle}>让农机监管更方便的智能化平台</p>
+          <h1 className={classes.title}>{import.meta.env.VITE_TITLE}</h1>
+          <p className={classes.subtitle}>{import.meta.env.VITE_SUBTITLE}</p>
           <Input
             type="text"
             value={userName}

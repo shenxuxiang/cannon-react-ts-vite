@@ -1,4 +1,10 @@
-import tween, { TweenAttrNames } from './tween';
+export { default as history, pathResolve, historyPush, historyReplace } from '@/utils/history';
+export { default as useReducer } from '@/utils/useReducer';
+export { default as encrypto } from '@/utils/encrypto';
+export { default as request } from '@/utils/axios';
+export { default as events } from '@/utils/events';
+import type { TweenAttrNames } from './tween';
+import tween from './tween';
 
 export function getType(data: any) {
   return Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
@@ -144,15 +150,19 @@ export function debounce(func: Function, delay: number, immediately = false) {
  */
 export function throttle(func: Function, delay: number, immediately = false) {
   let interval: any = null;
+  // 用来保存最新的参数，当 immediate 为 false 时有用。
+  let latestArgs: any = null;
   return function (...args: any[]) {
+    latestArgs = args;
     if (immediately) {
       if (interval) return;
-      func(...args);
+      func(...latestArgs);
       interval = setTimeout(() => (interval = null), delay);
     } else {
       if (interval) return;
       interval = setTimeout(() => {
-        func(...args);
+        // 注意，如果这里使用 args，args 可能不是最新的事件触发时传递的参数，所以这里使用 latestArgs。
+        func(...latestArgs);
         interval = null;
       }, delay);
     }
@@ -230,13 +240,13 @@ export function getLocalStorage(key: string) {
 }
 
 /**
- * 数字格式化，toFixed(990000000, 10000, 2) => 99000.00(单位：万)
+ * 数字格式化，toFixed(1234567, 2, 10000) => 123.46
  * @param value   需要计算的数值
- * @param divisor 格式化的单位（万：10000，百万：1000000）
  * @param float   保留的小数
+ * @param divisor 格式化的单位。
  * @returns
  */
-export function toFixed(value: string | number | null, divisor = 10000, float = 2) {
+export function toFixed(value: string | number | null, float = 2, divisor = 1) {
   // eslint-disable-next-line
   if (value == null) return '--';
   if (!value) return '0.00';
@@ -319,4 +329,19 @@ export function formatRegionCode(regionCode: string) {
   const district = regionCode.slice(0, 6);
   const town = regionCode.slice(0, 9);
   return [province, city, district, town, regionCode].slice(0, length);
+}
+
+/**
+ * 拆分页面路径 '/aa/bb/cc' => ['/aa', '/aa/bb', '/aa/bb/cc']
+ * @param pathname 页面路由
+ * @returns
+ */
+export function splitPath(pathname: string) {
+  const regexp = /(\/[^/?#]+)/g;
+  const expandKeys: string[] = [];
+  while (regexp.test(pathname)) {
+    expandKeys.push(pathname.slice(0, regexp.lastIndex));
+  }
+
+  return expandKeys;
 }

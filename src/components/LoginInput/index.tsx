@@ -22,7 +22,7 @@ function Input(props: InputProps, ref: any) {
   const { prefixIcon, rules, placeholder, onChange, value, type, defaultValue } = props;
   const [inputValue, setInputValue] = useState(defaultValue || '');
   const [showTips, updateShowTips] = useState(false);
-  const [tips, setTips] = useState('hellowoir');
+  const [tips, setTips] = useState('');
   const warningTipsRef = useRef<any>();
   const inputRef = useRef<any>();
   useEffect(() => {

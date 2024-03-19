@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Button, message, ConfigProvider } from 'antd';
 import type { Rule } from '@/components/LoginInput';
 import { LockOutlined } from '@ant-design/icons';
-import { updatePassword } from '@/models/login';
+import { updatePassword } from '@/api/login';
 import Input from '@/components/LoginInput';
 import useReducer from '@/utils/useReducer';
 import classes from './index.module.less';

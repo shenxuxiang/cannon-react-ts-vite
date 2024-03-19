@@ -22,7 +22,7 @@ const routesMap: RouteItem[] = [
     path: '/work-info',
     label: '作业信息',
     icon: <HomeOutlined style={iconStyle} />,
-    element: React.createElement(LazyLoader(() => import('../pages/workInfo'))),
+    element: React.createElement(LazyLoader(() => import('../pages/workInfo'), { requiresAuth: true })),
   },
   {
     path: '/system',
@@ -33,13 +33,13 @@ const routesMap: RouteItem[] = [
         label: '角色列表',
         path: '/system/role',
         icon: <UserSwitchOutlined style={iconStyle} />,
-        element: React.createElement(LazyLoader(() => import('../pages/system/role'))),
+        element: React.createElement(LazyLoader(() => import('../pages/system/role'), { requiresAuth: true })),
       },
     ],
   },
   {
     path: '/404',
-    element: React.createElement(LazyLoader(() => import('../pages/404'))),
+    element: React.createElement(LazyLoader(() => import('../pages/404'), { requiresAuth: false })),
   },
 ];
 

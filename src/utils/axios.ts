@@ -1,8 +1,7 @@
-import { createPath } from 'react-router-dom';
-import { getUserToken } from '@/utils';
-import history from '@/utils/history';
-import { message } from 'antd';
 import axios from 'axios';
+import { message } from 'antd';
+import { createPath, matchPath } from 'react-router-dom';
+import { getUserToken, history, historyPush } from '@/utils';
 import type { InternalAxiosRequestConfig, AxiosRequestConfig, AxiosResponse, AxiosInstance, AxiosError } from 'axios';
 
 let abortController = new AbortController();
@@ -145,10 +144,10 @@ class Request<AxiosRequestConfig> {
 
   // 重定向到登录页
   redirectionToLogin() {
-    const { location, push } = history;
-    if (location.pathname.startsWith('/login')) return;
+    const { location } = history;
+    if (matchPath('/login', location.pathname)) return;
     const querystring = window.encodeURIComponent(createPath(location));
-    push('/login?redirection=' + querystring);
+    historyPush('/login?redirection=' + querystring);
   }
 
   get(url: string, params?: RequestParams): Promise<ResponseData> {
