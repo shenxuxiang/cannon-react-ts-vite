@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
     mode,
     define,
     publicDir: 'public',
+    envPrefix: ['VITE_'],
     base: env.VITE_BASE_URL,
     resolve: {
       extensions: [ '.tsx', '.ts', '.jsx', '.js' ],
@@ -50,6 +51,12 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: true,
           drop_debugger: true,
+        },
+        keep_classnames: false,
+        keep_fnames: false,
+        pure_func: ['console.log', 'mockServer'],
+        format: {
+          comments: false,
         }
       },
       rollupOptions: {
@@ -96,26 +103,26 @@ export default defineConfig(({ mode }) => {
       devSourcemap: false,
     },
     server: {
-      port: 9999,
+      port: 3333,
       open: true,
       strictPort: true,
       host: 'localhost',
-      proxy: {
-        '/v1.0': {
-          target: 'http://192.168.5.2:20021',// 测试环境
-          // target: 'http://192.168.5.2:30021',// 正式环境
-          // target: 'http://192.168.5.120:2006',
-          // 测试
-          // target: 'http://192.168.5.61:2006',
-          changeOrigin: true,
-        },
-        '/group1': {
-          // target: 'http://192.168.5.120:2005',
-          // 测试
-          target: 'http://192.168.5.2:20021',
-          changeOrigin: true,
-        },
-      }
+      // proxy: {
+      //   '/v1.0': {
+      //     target: 'http://192.168.5.2:20021',// 测试环境
+      //     // target: 'http://192.168.5.2:30021',// 正式环境
+      //     // target: 'http://192.168.5.120:2006',
+      //     // 测试
+      //     // target: 'http://192.168.5.61:2006',
+      //     changeOrigin: true,
+      //   },
+      //   '/group1': {
+      //     // target: 'http://192.168.5.120:2005',
+      //     // 测试
+      //     target: 'http://192.168.5.2:20021',
+      //     changeOrigin: true,
+      //   },
+      // }
     },
     test: {
       include: [ 'test/**/*.{test,spec}.[jt]s(x)?' ],

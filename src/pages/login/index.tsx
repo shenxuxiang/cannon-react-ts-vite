@@ -1,8 +1,7 @@
-import { setUserToken, getUserToken, setCookie, getCookie, encrypto, useReducer } from '@/utils';
-import { Button, message, Checkbox, ConfigProvider, Spin } from 'antd';
+import { setUserToken, setCookie, encrypto, useReducer } from '@/utils';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { Button, message, Checkbox, ConfigProvider } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useBasicContext } from '@/common/BasicContext';
 import type { Rule } from '@/components/LoginInput';
 import Input from '@/components/LoginInput';
 import classes from './index.module.less';
@@ -21,33 +20,9 @@ function initialState() {
 }
 
 function Login(props: any) {
+  const { location, navigate } = props;
   const [state, setState] = useReducer(initialState);
-  const { location, navigate, queryUserInfo } = props;
-  const { updateContext: updateBasicContext } = useBasicContext();
-  const { loading, userName, password, memorizeUser, spinning } = state;
-
-  useEffect(() => {
-    // 如果 Token 存在，则直接获取用户信息并跳转到网站首页。否则需要用户手动登录。
-    if (getUserToken()) {
-      // 菜单和用户访问权限都在用户信息中。
-      queryUserInfo()
-        .then(async (res: any) => {
-          updateBasicContext({ userInfo: res.data });
-          // 回到首页，在 <App /> 中进行路由重定向
-          navigate('/');
-        })
-        .catch(() => {
-          // 用户信息获取失败时，必须手动完成登录。
-          const userName = getCookie('USER_NAME_RECORD');
-          userName && setState({ userName });
-        })
-        .finally(() => setState({ spinning: false }));
-    } else {
-      setState({ spinning: false });
-      const userName = getCookie('USER_NAME_RECORD');
-      userName && setState({ userName });
-    }
-  }, []);
+  const { loading, userName, password, memorizeUser } = state;
 
   const changeUserName = useCallback((event: any) => {
     setState({ userName: event.target.value });
@@ -117,16 +92,7 @@ function Login(props: any) {
           // 有效期 31 天
           memorizeUser && setCookie('USER_NAME_RECORD', userName, 2678400);
 
-          try {
-            // 获取用户信息
-            const res = await queryUserInfo();
-            updateBasicContext({ userInfo: res.data });
-
-            handleNavigateBack();
-          } catch (error) {
-            message.warning('用户信息获取失败~');
-            console.log(error);
-          }
+          handleNavigateBack();
         })
         .finally(() => setState({ loading: false }));
     }
@@ -160,14 +126,6 @@ function Login(props: any) {
     }),
     [],
   );
-
-  if (spinning) {
-    return (
-      <Spin delay={500} spinning={spinning} size="large">
-        <div style={{ height: '100vh' }} />
-      </Spin>
-    );
-  }
 
   return (
     <section className={classes.login_page}>

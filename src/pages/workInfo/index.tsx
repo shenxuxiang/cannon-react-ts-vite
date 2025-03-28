@@ -76,7 +76,7 @@ function Page() {
       bordered
       rowKey="id"
       columns={columns}
-      requestDataSource={queryTableList}
+      queryTableList={queryTableList}
       beforeQueryAction={handleValidateFormModels}
     />
   );

@@ -111,11 +111,11 @@ export function routerGuard(permissions: Map<string, object>, pathname: string) 
 export default memo(() => {
   return useRoutes([
     {
-      element: React.createElement(LazyLoader(() => import('../pages/login'), { requiresAuth: false })),
+      element: React.createElement(LazyLoader(() => import('../pages/login'))),
       path: '/login',
     },
     {
-      element: React.createElement(LazyLoader(() => import('../pages/updatePassword'), { requiresAuth: true })),
+      element: React.createElement(LazyLoader(() => import('../pages/updatePassword'))),
       path: '/update-passwd',
     },
     {
@@ -125,7 +125,7 @@ export default memo(() => {
     },
     {
       path: '*',
-      element: React.createElement(LazyLoader(() => import('../pages/404'), { requiresAuth: false })),
+      element: React.createElement(LazyLoader(() => import('../pages/404'))),
     },
   ]);
 });

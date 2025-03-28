@@ -145,8 +145,11 @@ class Request<AxiosRequestConfig> {
   // 重定向到登录页
   redirectionToLogin() {
     const { location } = history;
-    if (matchPath('/login', location.pathname)) return;
-    const querystring = window.encodeURIComponent(createPath(location));
+
+    const pathname = location.pathname.replace(import.meta.env.BASE_URL, '/');
+
+    if (matchPath('/login', pathname)) return;
+    const querystring = window.encodeURIComponent(createPath({ ...location, pathname }));
     historyPush('/login?redirection=' + querystring);
   }
 
