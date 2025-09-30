@@ -11,7 +11,9 @@ export default class Model {
     keys.splice(keys.indexOf('constructor'), 1);
 
     // prettier-ignore
-    const initialState = ({ ...this}) as S;
+    // const initialState = ({ ...this}) as S;
+    // eslint-disable-next-line prefer-object-spread
+    const initialState = Object.assign({}, this) as S;
     const finalTypes = keys.map((key) => `${prefix}/${key}`);
 
     return function (initState: S = initialState, action: ReduxAction) {
