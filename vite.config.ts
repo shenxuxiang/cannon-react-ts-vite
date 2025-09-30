@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
     envPrefix: ['VITE_'],
     base: env.VITE_BASE_URL,
     resolve: {
-      extensions: [ '.tsx', '.ts', '.jsx', '.js' ],
+      extensions: ['.tsx', '.ts', '.jsx', '.js'],
       alias: {
         '@': path.resolve('src'),
       }
@@ -48,16 +48,20 @@ export default defineConfig(({ mode }) => {
       sourcemap: 'hidden',
       assetsInlineLimit: 10 * 1024,
       terserOptions: {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-        },
-        keep_classnames: false,
+        // 不保留函数名
         keep_fnames: false,
-        pure_func: ['console.log', 'mockServer'],
-        format: {
-          comments: false,
-        }
+        // 不保留类名
+        keep_classnames: false,
+        // 移除注释
+        format: { comments: false },
+        compress: {
+          // 移除所有的 console.log
+          drop_console: true,
+          // 移除 debugger 语句
+          drop_debugger: true,
+          // 移除特定的函数调用
+          pure_funcs: ['console.log', 'mockServer'],
+        },
       },
       rollupOptions: {
         output: {
@@ -76,14 +80,14 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'js/[name].[hash].js',
           chunkFileNames: 'js/[name].[hash].chunk.js',
           manualChunks: {
-            'vendor-react': [ 'react', 'react-dom' ]
+            'vendor-react': ['react', 'react-dom']
           }
         }
       }
     },
     css: {
       postcss: {
-        plugins: [ postcssPresetEnv ]
+        plugins: [postcssPresetEnv]
       },
       // modules: {
       //   scopeBehaviour: 'local',
@@ -125,15 +129,15 @@ export default defineConfig(({ mode }) => {
       // }
     },
     test: {
-      include: [ 'test/**/*.{test,spec}.[jt]s(x)?' ],
+      include: ['test/**/*.{test,spec}.[jt]s(x)?'],
       environment: 'jsdom',
       reporters: 'verbose',
       // setup 文件的路径。它们将运行在每个测试文件之前。
-      setupFiles: [ './vitest.setup.ts' ],
+      setupFiles: ['./vitest.setup.ts'],
       // 配置是否应处理 CSS。
       css: {
         // /.+/ 将匹配所有的 css 文件
-        include: [ /.+/ ],
+        include: [/.+/],
       },
       // 覆盖分析选项
       coverage: {
@@ -141,7 +145,7 @@ export default defineConfig(({ mode }) => {
         // 是否启用，默认 false。
         enabled: true,
         // 对哪些文件或路径下面的文件进行分析
-        include: [ 'src/utils', 'src/components', 'src/pages' ]
+        include: ['src/utils', 'src/components', 'src/pages']
       }
     },
   };
