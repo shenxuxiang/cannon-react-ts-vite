@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Button, message, ConfigProvider } from 'antd';
 import type { Rule } from '@/components/LoginInput';
 import { LockOutlined } from '@ant-design/icons';
@@ -7,7 +7,9 @@ import Input from '@/components/LoginInput';
 import useReducer from '@/utils/useReducer';
 import classes from './index.module.less';
 import encrypto from '@/utils/encrypto';
+import dayjs from 'dayjs';
 
+const currentYear = dayjs().format('YYYY');
 type Rules = { [propName: string]: Array<Rule> };
 
 function initialState() {
@@ -128,7 +130,7 @@ function Login(props: any) {
       confirmPassword: [
         {
           validator: (input: string) => {
-            if (newPasswordRef.current.input.value !== input) {
+            if (newPasswordRef.current?.input?.value !== input) {
               return '两次输入的密码不一致';
             } else {
               return true;
@@ -186,7 +188,7 @@ function Login(props: any) {
           </ConfigProvider>
         </div>
       </div>
-      <div className={classes.login_footer}>安徽阡陌网络科技有限公司 ©2022 Created by Qianmo</div>
+      <div className={classes.login_footer}>安徽阡陌网络科技有限公司 ©{currentYear} Created by Qianmo</div>
     </section>
   );
 }

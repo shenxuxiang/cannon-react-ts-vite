@@ -1,7 +1,7 @@
 import { setUserToken, setCookie, encrypto, useReducer } from '@/utils';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { Button, message, Checkbox, ConfigProvider } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import type { Rule } from '@/components/LoginInput';
 import Input from '@/components/LoginInput';
 import classes from './index.module.less';
@@ -84,7 +84,7 @@ function Login(props: any) {
       const params = { username: userName, password: encrypto(password) };
 
       signIn(params)
-        .then(async (response: any) => {
+        .then((response: any) => {
           message.success('登录成功');
           const { token } = response?.data ?? {};
           // 存储 Token 到本地缓存

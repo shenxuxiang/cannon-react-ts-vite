@@ -5,7 +5,7 @@ import process from 'process';
 import svgr from 'vite-plugin-svgr';
 import react from '@vitejs/plugin-react';
 import legacy from '@vitejs/plugin-legacy';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, } from 'vite';
 import postcssPresetEnv from 'postcss-preset-env';
 // vite 默认不支持 require，使用 requireTransform 将支持 require(...)
 import requireTransform from 'vite-plugin-require-transform';
@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
   const define = Object.keys(env).reduce((memo, key) => {
     memo[key] = JSON.stringify(env[key]);
     return memo;
-  }, {});
+  }, {} as any);
 
   return {
     mode,
@@ -66,7 +66,9 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           assetFileNames: (chunkInfo) => {
-            const { name } = chunkInfo;
+            const { names } = chunkInfo;
+            const name = names[0];
+
             if (/\.(jpg|jpeg|png|webp|bmp|gif|svg)$/.test(name)) {
               return 'image/[name].[hash][extname]';
             } else if (/\.(woff2|woff|ttf|eot)$/.test(name)) {
@@ -79,9 +81,6 @@ export default defineConfig(({ mode }) => {
           },
           entryFileNames: 'js/[name].[hash].js',
           chunkFileNames: 'js/[name].[hash].chunk.js',
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom']
-          }
         }
       }
     },

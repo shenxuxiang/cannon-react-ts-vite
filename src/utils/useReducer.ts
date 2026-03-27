@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-type InitialStateType<S> = () => S | S;
+type InitialStateType<S> = () => S;
 
 type Action<S> = Partial<S> | ((prevState: S) => Partial<S>);
 

@@ -1,16 +1,15 @@
-import { splitPath, useReducer, isEmpty, getUserToken, getLocalStorage, setLocalStorage } from '@/utils';
+import { useReducer, isEmpty, getUserToken, getLocalStorage, setLocalStorage } from '@/utils';
 import { MenuUnfoldOutlined, MenuFoldOutlined, SlackSquareOutlined } from '@ant-design/icons';
-import { getMenuItems, getHomeURL, getUserPermissions, routerGuard } from '@/routers';
 import { useNavigate, useLocation, Outlet, createPath } from 'react-router-dom';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Layout, Avatar, Menu, Breadcrumb, Dropdown } from 'antd';
 import type { NavBarList } from 'qm-vnit/lib/NavigationBar';
-import { useBasicContext } from '@/common/BasicContext';
+import { useActions, useModel } from '@/redux';
+import { routerGuard } from '@/routers';
 import { NavigationBar } from 'qm-vnit';
 import { mainActions } from '@/models';
 import { signOut } from '@/api/login';
-import { useActions } from '@/redux';
 import cn from 'classnames';
 import dayjs from 'dayjs';
 import './index.less';
@@ -35,12 +34,10 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const { queryUserInfo } = useActions(mainActions);
   const [state, setState] = useReducer(initialState);
-  const { openKeys, collapsed, selectedMenuKeys, breadCrumbItems, navBarList, navBarActiveKey } = state;
 
-  const {
-    context: { userInfo, userMenuItems, userPermissions, homeURL },
-    updateContext: updateBasicContext,
-  } = useBasicContext();
+  const { userInfo, homeURL, userMenuItems, userPermissions } = useModel('main');
+
+  const { openKeys, collapsed, selectedMenuKeys, breadCrumbItems, navBarList, navBarActiveKey } = state;
 
   const openKeysRef = useRef(openKeys);
   const navBarListRef = useRef<NavBarList>(navBarList);
@@ -50,19 +47,7 @@ const MainLayout: React.FC = () => {
       navigate('/login');
     } else if (isEmpty(userInfo)) {
       // 获取用户信息
-      queryUserInfo().then((resp: any) => {
-        const userInfo = resp.data;
-        // resourceTree 为用户路由权限
-        const { resourceTree } = userInfo;
-        // 用户访问页面权限
-        const userPermissions = getUserPermissions(resourceTree || []);
-        // 用户菜单列表
-        const userMenuItems = getMenuItems(userPermissions);
-        // 网站首页 URL
-        const homeURL = getHomeURL(userMenuItems);
-
-        updateBasicContext({ userInfo, userPermissions, userMenuItems, homeURL });
-      });
+      queryUserInfo();
     } else {
       // 路由守卫
       if (location.pathname === '/') {
@@ -89,7 +74,7 @@ const MainLayout: React.FC = () => {
           const data = {
             breadCrumbItems,
             selectedMenuKeys: [location.pathname],
-            openKeys: splitPath(location.pathname),
+            openKeys: pathnames, // splitPath(location.pathname),
           };
 
           if (prevState.collapsed) {
@@ -138,7 +123,7 @@ const MainLayout: React.FC = () => {
     setState({ collapsed: !collapsed, openKeys: openKeysRef.current });
   }, [collapsed]);
 
-  const goHome = () => navigate(homeURL!);
+  const goHome = () => navigate(homeURL);
 
   const renderDropdownMenu = useMemo(() => {
     // 修改密码
@@ -180,7 +165,7 @@ const MainLayout: React.FC = () => {
     setLocalStorage('ROUTER_HISTORY_LIST', navBarList);
   }, []);
 
-  return (
+  return isEmpty(userInfo) ? null : (
     <Layout style={{ height: '100vh' }}>
       <Sider width={240} collapsible theme="light" trigger={null} collapsed={collapsed} className="qm-layout-left-side">
         <div className={cn(['qm-layout-logo-box', collapsed ? 'collapse' : null])} onClick={goHome}>

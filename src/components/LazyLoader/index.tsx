@@ -1,9 +1,9 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, memo } from 'react';
 import { mainActions, mainReducer } from '@/models';
+import type { ReduxAction } from '@/common/model';
 import type { Reducer } from '@reduxjs/toolkit';
 import { useModel, useActions } from '@/redux';
-import { ReduxAction } from '@/common/model';
 import { replaceReducer } from '@/redux';
 import { Spin } from 'antd';
 

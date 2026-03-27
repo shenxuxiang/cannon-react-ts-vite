@@ -39,6 +39,7 @@ enum ResponseCode {
 }
 
 type RequestParams = { [key: string]: any };
+type RequestOptionsConfig = AxiosRequestConfig<RequestParams>;
 
 type ResponseData = {
   data?: any;
@@ -72,7 +73,7 @@ class Request<AxiosRequestConfig> {
     };
   };
 
-  onRejectedRequest = (error: any) => {
+  onRejectedRequest = (error: Error) => {
     return Promise.reject(error);
   };
 
@@ -105,11 +106,11 @@ class Request<AxiosRequestConfig> {
       abortRequest();
       window.localStorage.clear();
       this.redirectionToLogin();
-      return Promise.reject(data);
+      return Promise.reject(Error(data.message || '登录已过期，请重新登录'));
     }
 
     message.error(data.message || '请求异常，请联系管理员');
-    return Promise.reject(data);
+    return Promise.reject(Error(data.message || '请求异常，请联系管理员'));
   };
 
   onRejectedResponse = (error: AxiosError) => {
@@ -123,7 +124,7 @@ class Request<AxiosRequestConfig> {
     } else {
       message.error('请求失败，请联系管理员');
     }
-    return Promise.reject(null);
+    return Promise.reject(error);
   };
 
   // 校验状态码
@@ -165,12 +166,12 @@ class Request<AxiosRequestConfig> {
     return this.instance.delete(url, { data: params });
   }
 
-  post(url: string, params?: RequestParams, config?: AxiosRequestConfig): Promise<ResponseData> {
-    return this.instance.post(url, params, config!);
+  post(url: string, params?: RequestParams, config?: RequestOptionsConfig): Promise<ResponseData> {
+    return this.instance.post(url, params, config);
   }
 
-  put(url: string, params?: RequestParams, config?: AxiosRequestConfig): Promise<ResponseData> {
-    return this.instance.put(url, params, config!);
+  put(url: string, params?: RequestParams, config?: RequestOptionsConfig): Promise<ResponseData> {
+    return this.instance.put(url, params, config);
   }
 }
 

@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import { ContentFormTable } from 'qm-vnit';
 import { queryTableList } from '@/api/workInfo';
-import React, { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { Button, Popconfirm, Space, message } from 'antd';
 
 function Page() {

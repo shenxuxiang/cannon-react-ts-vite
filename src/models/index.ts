@@ -9,21 +9,21 @@ import WorkInfoModel from './workInfo';
 import SystemRoleModel from './systemRole';
 
 export type AllModelStateType = {
-  main: typeof MainModel;
-  workInfo: typeof WorkInfoModel;
-  systemRole: typeof SystemRoleModel;
+  main: MainModel;
+  workInfo: WorkInfoModel;
+  systemRole: SystemRoleModel;
 };
 
 const mainModel = new MainModel();
-export const mainReducer = mainModel.reducer<typeof MainModel>();
+export const mainReducer = mainModel.reducer<MainModel>();
 export const mainActions = mainModel.actions<typeof MainModel.prototype>();
 
 // 作业信息
 const workInfoModel = new WorkInfoModel();
-export const workInfoReducer = workInfoModel.reducer<typeof WorkInfoModel>();
+export const workInfoReducer = workInfoModel.reducer<WorkInfoModel>();
 export const workInfoActions = workInfoModel.actions<typeof WorkInfoModel.prototype>();
 
 // 系统管理
 const systemRoleModel = new SystemRoleModel();
-export const systemRoleReducer = systemRoleModel.reducer<typeof SystemRoleModel>();
+export const systemRoleReducer = systemRoleModel.reducer<SystemRoleModel>();
 export const systemRoleActions = systemRoleModel.actions<typeof SystemRoleModel.prototype>();

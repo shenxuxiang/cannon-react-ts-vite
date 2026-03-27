@@ -63,7 +63,7 @@ export function extName(filename: string) {
  * @param extName  文件后缀
  * @returns
  */
-export function downloadFile(fileName: string, data: Blob | ArrayBuffer | DataView, extName = '.xlsx') {
+export function downloadFile(fileName: string, data: BlobPart, extName = '.xlsx') {
   const blob = new Blob([data]);
   const eLink = document.createElement('a');
   // <a/> 上的 download 属性用于重命名一个需要下载的文件
@@ -191,7 +191,7 @@ export function scrollToPosition(options: ScrollToPositionOptions) {
 
   function execAnimation(count: number) {
     const scrollTop = container.scrollTop;
-    let pos = tween[timingFunction](count, scrollTop, position - scrollTop, times);
+    const pos = tween[timingFunction](count, scrollTop, position - scrollTop, times);
     container.scrollTop = pos;
     if (pos === position || count >= times) return;
     requestAnimationFrame(() => execAnimation(count + 1));
@@ -235,7 +235,7 @@ export function setLocalStorage(key: string, value: any) {
  * @returns
  */
 export function getLocalStorage(key: string) {
-  let value = window.localStorage.getItem(key);
+  const value = window.localStorage.getItem(key);
   return value ? JSON.parse(value) : null;
 }
 
@@ -247,7 +247,6 @@ export function getLocalStorage(key: string) {
  * @returns
  */
 export function toFixed(value: string | number | null, float = 2, divisor = 1) {
-  // eslint-disable-next-line
   if (value == null) return '--';
   if (!value) return '0.00';
   return ((value as number) / divisor).toFixed(float);

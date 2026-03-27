@@ -16,6 +16,8 @@ export type ResourceTree = {
   children?: ResourceTree;
 }[];
 
+export type UserPermissions = Map<string, { name: string; path: string }>;
+
 /**
  * 获取用户权限
  * @param resourceTree
@@ -23,7 +25,7 @@ export type ResourceTree = {
  */
 export function getUserPermissions(resourceTree: ResourceTree) {
   const stack = [...resourceTree];
-  const menuMap = new Map<string, { name: string; path: string }>();
+  const menuMap: UserPermissions = new Map();
 
   while (stack.length) {
     const item = stack.shift()!;

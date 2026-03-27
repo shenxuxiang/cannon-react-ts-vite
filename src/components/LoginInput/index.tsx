@@ -23,8 +23,8 @@ function Input(props: InputProps, ref: any) {
   const [inputValue, setInputValue] = useState(defaultValue || '');
   const [showTips, updateShowTips] = useState(false);
   const [tips, setTips] = useState('');
-  const warningTipsRef = useRef<any>();
-  const inputRef = useRef<any>();
+  const warningTipsRef = useRef<any>(null);
+  const inputRef = useRef<any>(null);
   useEffect(() => {
     setInputValue(() => value!);
   }, [value]);

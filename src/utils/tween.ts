@@ -7,7 +7,7 @@
  * @return { number }
  * @author shenxuxiang
  */
-/* eslint-disable */
+
 export const linear = (t: number, b: number, c: number, d: number) => (c * t) / d + b;
 
 export const easeIn = (t: number, b: number, c: number, d: number) => (t === 0 ? b : c * 2 ** (10 * (t / d - 1)) + b);

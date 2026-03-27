@@ -11,9 +11,9 @@ export default class Model {
     keys.splice(keys.indexOf('constructor'), 1);
 
     // prettier-ignore
-    // const initialState = ({ ...this}) as S;
     // eslint-disable-next-line prefer-object-spread
     const initialState = Object.assign({}, this) as S;
+
     const finalTypes = keys.map((key) => `${prefix}/${key}`);
 
     return function (initState: S = initialState, action: ReduxAction) {
@@ -30,7 +30,8 @@ export default class Model {
   actions<A>() {
     const prototype = Object.getPrototypeOf(this);
     const keys = Object.getOwnPropertyNames(prototype);
-    keys.shift();
+    const idx = keys.indexOf('constructor');
+    if (idx > -1) keys.splice(idx, 1);
 
     const actions = {} as any;
     keys.forEach((key) => {

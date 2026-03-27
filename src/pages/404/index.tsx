@@ -1,14 +1,11 @@
 import { Button } from 'antd';
+import { useModel } from '@/redux';
 import classes from './index.module.less';
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import NotFoundSvg from '@/assets/images/404.svg?react';
-import { useBasicContext } from '@/common/BasicContext';
-
 function Page(props: any) {
   const { navigate } = props;
-  const {
-    context: { homeURL },
-  } = useBasicContext();
+  const { homeURL } = useModel('main');
 
   const goHome = useCallback(() => {
     if (homeURL) {
